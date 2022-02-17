@@ -6,9 +6,12 @@ import tweepy
 import requests
 from bs4 import BeautifulSoup
 
-def get_technical():
+def get_technical(symbol="INFY.NS",period = '5y'):
     '''returns a DataFrame with stock technical data'''
-    pass
+    ticker = yfinance.Ticker(symbol)
+    df = ticker.history(period = period)
+    df.drop(columns=['Dividends','Stock Splits'],inplace=True)
+    return df
 
 def get_fundamental():
     '''returns a DataFrame of stock fundamental data'''
