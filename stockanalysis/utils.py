@@ -9,15 +9,16 @@ def compute_rmse(y_pred, y_true):
     '''returns root mean square error'''
     return np.sqrt(((y_pred - y_true) ** 2).mean())
 
-def get_sma(df,column='Close',period=5):
+
+def get_sma(df, period=5, column='Close'):
     '''returns simple moving average of provide column and period'''
     return pta.sma(df[column],length=period)
 
-def get_ema(df, column='Close', period=10):
+def get_ema(df, period=10 , column='Close'):
     '''returns simple moving average of provide column and period'''
     return pta.ema(df[column], length=period)
 
-def get_hma(df, column='Close', period=10):
+def get_hma(df, period=10 ,column='Close'):
     '''returns simple moving average of provide column and period'''
     return pta.hma(df[column], length=period)
 
@@ -44,6 +45,14 @@ def get_adx(df,length=14):
 def get_vwap(df):
     '''returns Voumne weighted average'''
     return pta.vwap(df['High'],df['Low'],df['Close'], df['Volume'])
+
+
+def get_donchian(df, lower_length=20, upper_length=20):
+    '''returns Voumne weighted average'''
+    return pta.donchian(df['High'],
+                        df['Low'],
+                        lower_length=20,
+                        upper_length=20)
 
 def get_stock_info(ticker):
     '''returns a DataFrame with stock detailed information.'''
