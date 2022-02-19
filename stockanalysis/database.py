@@ -48,22 +48,22 @@ class MySQLDB:
 
     #Save dataframe to table
     #https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-executemany.html
-    def SaveDFToTable(self,TableName,df):
+    def SaveDFToTable(self,query,df):
         conn = self.getConnection()
         _cursor = conn.cursor()
-        print(list(df.to_records(index=False)))
-        _cursor.executemany(query, df)
+        _cursor.executemany(query, df.to_numpy().tolist())
         _cursor.close()
         conn.commit()  # and commit changes
         conn.close()
 
-    def SaveDictionayToTable(self,TableName,dataDict):
+    def SaveDictionayToTable(self,query,dataDict):
         conn = self.getConnection()
         _cursor = conn.cursor()
         df = pd.DataFrame.from_dict(dataDict)
-        print(list(df.to_records(index=False)))
+        listdata=df.to_numpy().tolist()
+        print(listdata)
         #df.to_sql(TableName,conn)
-        _cursor.executemany(query, (df.to_records(index=False)))
+        _cursor.executemany(query, listdata)
         _cursor.close()
         conn.commit()  # and commit changes
         conn.close()
@@ -75,27 +75,27 @@ if __name__ == "__main__":
     query = ("INSERT INTO stocksdb.StocksList ( StockName,StockCode,exchange) "
              "VALUES (%s, %s, %s)")
     #insert single value from list of dictionary
-    data=('Tata Motors Ltd','TATAMOTORS','NSE')
+    #data=('Tata Motors Ltd','TATAMOTORS','NSE')
     #data = {'StockName': 'Tata Motors Ltd','StockCode':'TATAMOTORS','exchange':'NSE'}
-    mysql.InsertUpdateData(query, data)
+    #mysql.InsertUpdateData(query, data)
     queryDic = ("INSERT INTO stocksdb.StocksList ( StockName,StockCode,exchange) "
              "VALUES (%(StockName)s, %(StockCode)s, %(exchange)s)")
     #data=('Tata Motors Ltd','TATAMOTORS','NSE')
 
 
     #save the dataframe to table
-    data = [('Tata Motors Ltd', 'TATAMOTORS', 'NSE'),
-           ('Microsoft', 'Micro', 'NASDAQ')]
+    data = pd.DataFrame([('Tata Motors Ltd', 'TATAMOTORS', 'NSE'),
+           ('Microsoft', 'Micro', 'NASDAQ')])
     mysql.SaveDFToTable(query, data)
 
 
     #save data from multple value from dictionary to table
-    # dataDictstocks = {
-    #     'StockName': ['Tata Motors Ltd1','Microsoft1'],
-    #     'StockCode': ['TATAMOTORS1','Micro1'],
-    #     'exchange': ['NSE','NASDAQ']
-    # }
-    # mysql.SaveDictionayToTable(queryDic, dataDictstocks)
+    dataDictstocks = {
+        'StockName': ['Tata Motors Ltd1','Microsoft1'],
+        'StockCode': ['TATAMOTORS1','Micro1'],
+        'exchange': ['NSE','NASDAQ']
+    }
+    #mysql.SaveDictionayToTable(query, dataDictstocks)
 
 
     #mysql.ExecuteDDLStatement("CREATE TABLE stocksdb.tet ( ID INT NOT NULL, Date date NOT NULL)")
