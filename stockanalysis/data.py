@@ -5,6 +5,7 @@ import pandas_ta as pta
 import tweepy
 import requests
 from bs4 import BeautifulSoup
+from utils import *
 
 def get_technical(symbol="INFY.NS",period = '5y'):
     '''returns a DataFrame with stock technical data'''
@@ -19,7 +20,7 @@ def get_fundamental():
 
 def get_tweets():
     '''returns a DataFrame with tweets realted to stock'''
-    pass
+    
 
 def get_stock_news():
     '''returns a DataFrame with latest news realted of stock'''
@@ -38,3 +39,6 @@ def clean_data(df, test=False):
 if __name__ == '__main__':
     df = get_technical()
     cleaned_df = clean_data(df)
+    cleaned_df['SMA5'] = get_sma(cleaned_df, column='Close', period=5)
+    get_tweets()
+    print(cleaned_df)
