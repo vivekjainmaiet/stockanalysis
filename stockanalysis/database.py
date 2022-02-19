@@ -27,11 +27,13 @@ class MySQLDB:
             print(str(e))
         return result_dataFrame
     #insert or updte for single record or single dictionary
+    #https://dev.mysql.com/doc/connector-python/en/connector-python-example-cursor-transaction.html
     def InsertUpdateData(self,query,data):
         conn=self.getConnection()
         _cursor = conn.cursor()
         # data could be list or dictionary
         _cursor.execute(query, data)
+        _cursor.close()
         conn.commit()  # and commit changes
         conn.close()
     #Create a object like table or view etc
@@ -40,15 +42,18 @@ class MySQLDB:
         _cursor = _conn.cursor()  # initialize connection cursor
         #createStatement = "CREATE TABLE stocksdb.tet ( ID INT NOT NULL, Date date NOT NULL)"
         _cursor.execute(createStatement)  # create a new 'testdb' database
+        _cursor.close()
         _conn.commit()
         _conn.close()  # close connection
 
     #Save dataframe to table
+    #https://dev.mysql.com/doc/connector-python/en/connector-python-api-mysqlcursor-executemany.html
     def SaveDFToTable(self,TableName,df):
         conn = self.getConnection()
         _cursor = conn.cursor()
         print(list(df.to_records(index=False)))
         _cursor.executemany(query, df)
+        _cursor.close()
         conn.commit()  # and commit changes
         conn.close()
 
@@ -59,6 +64,7 @@ class MySQLDB:
         print(list(df.to_records(index=False)))
         #df.to_sql(TableName,conn)
         _cursor.executemany(query, (df.to_records(index=False)))
+        _cursor.close()
         conn.commit()  # and commit changes
         conn.close()
 
