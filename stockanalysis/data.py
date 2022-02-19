@@ -61,6 +61,12 @@ def clean_data(df, test=False):
 
 
 if __name__ == '__main__':
+    from stockanalysis.database import *
+    db=MySQLDB()
     df = get_technical()
     cleaned_df = clean_data(df)
+    cleaned_df = cleaned_df
     print(cleaned_df)
+    #query = ("INSERT INTO stocksdb.TechnicalData (Date,StockID) "
+             #"VALUES (%s, 1)")
+    #db.SaveDFToTable(query, cleaned_df)

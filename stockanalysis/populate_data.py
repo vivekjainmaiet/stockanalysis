@@ -6,4 +6,4 @@ from stockanalysis.database import *
 
 mysql=MySQLDB()
 df=mysql.getData_df("SELECT * FROM stocksdb.StocksList;")
-print(df)
+SaveDFToTable(self, query, df)
