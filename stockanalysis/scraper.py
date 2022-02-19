@@ -71,7 +71,7 @@ class Scraper:
         df['clean_text'] = df['clean_text'].str.replace("[^a-zA-Z#]", " ")
 
         #removing short words
-        df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>3]))
+        df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>2]))
 
 #_________________________________________________________________________________________________________________________________________
 
@@ -96,7 +96,8 @@ class Scraper:
 
         date= df_final['created_at'][0].strftime('%Y-%m-%d') #convert timestamp to str
         file_name= f'{date}.csv'
-        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/daily_tweets/{file_name}')
+        #df_final.to_csv(f'/Users/vivek/code/vivekjainmaiet/stockanalysis/{file_name}')
+        return df_final
 
 #________________________________________________________________________________________________________________________________________
 

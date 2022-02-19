@@ -6,3 +6,7 @@ def remove_pattern(input_txt, pattern):
         input_txt = re.sub(i, '', input_txt)
 
     return input_txt
+
+
+def lower(text):
+    return text.lower()
