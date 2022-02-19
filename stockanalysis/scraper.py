@@ -71,7 +71,7 @@ class Scraper:
         df['clean_text'] = df['clean_text'].str.replace("[^a-zA-Z#]", " ")
 
         #removing short words
-        df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>3]))
+        df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>2]))
 
 #_________________________________________________________________________________________________________________________________________
 
