@@ -8,7 +8,7 @@ from sentiment import *
 from text_preprocessing import *
 
 #-> (PREDICT)
-# MONDAY->TUESDAY->WEDNESDAY->THURSDAY->FRIDAY->MONDAY...
+# MONDAY->TUESDAY->WEDNESDAY->THURSDAY->FRIDAY->MONDAY....
 
 
 class Scraper:
