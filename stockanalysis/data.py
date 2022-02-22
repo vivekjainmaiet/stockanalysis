@@ -66,7 +66,7 @@ if __name__ == '__main__':
     df = get_technical()
     cleaned_df = clean_data(df)
     cleaned_df = cleaned_df
-    print(cleaned_df)
+    cleaned_df.to_csv("raw_technical.csv", sep='\t', encoding='utf-8')
     #query = ("INSERT INTO stocksdb.TechnicalData (Date,StockID) "
-             #"VALUES (%s, 1)")
+    #"VALUES (%s, 1)")
     #db.SaveDFToTable(query, cleaned_df)

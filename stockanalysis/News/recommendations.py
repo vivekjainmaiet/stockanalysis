@@ -7,7 +7,7 @@ from stockanalysis.utils import *
 
 def get_nse_sentiments(ticker='TCS', recommendation=False, news=False):
     url = f"https://www.moneycontrol.com/stocks/company_info/stock_news.php?sc_id={ticker}&durationType=M&duration=6"
-    #url = "https://www.moneycontrol.com/company-article/    /news/{ticker}"
+    #url = "https://www.moneycontrol.com/stocks/company_info/stock_news.php?sc_id=IT&durationType=M&duration=6"
     request = requests.get(url)
 
     parser = BeautifulSoup(request.text, "html.parser")

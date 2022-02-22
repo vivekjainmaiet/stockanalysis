@@ -80,8 +80,9 @@ class MoneyControl:
 
 
 if __name__ == "__main__":
-    moneycontrol = MoneyControl('TCS', max_results=10)
+    moneycontrol = MoneyControl('IT', max_results=10)
     df = moneycontrol.get_nse_sentiments(recommendation=True)
     df1=moneycontrol.get_nse_sentiments(news=True)
     df2 = moneycontrol.get_nse_sentiments(recommendation=True,news=True)
-    breakpoint()
+    df.to_csv("raw_recommendation.csv", sep='\t', encoding='utf-8')
+    df1.to_csv("raw_news.csv", sep='\t', encoding='utf-8')
