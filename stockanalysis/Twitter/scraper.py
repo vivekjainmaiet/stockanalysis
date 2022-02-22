@@ -2,10 +2,6 @@ import tweepy
 import datetime as datetime
 import pandas as pd
 import numpy as np
-import csv
-import re
-import string
-from textblob import TextBlob
 from keys import *
 from scraper import *
 from sentiment import *
@@ -23,8 +19,8 @@ class Scraper:
 
         #GLOBAL CLASS ATTRIBUTES#
 
-        self.today = str(datetime.date.today())+'T00:00:00Z'  #I need a  RFC 3339 timestamp format
-        self.yesterday = str(datetime.date.today() - datetime.timedelta(days=1)) + 'T00:00:00Z'
+        self.today = '2022-02-22T00:00:00Z'#str(datetime.date.today())+'T00:00:00Z'  #I need a  RFC 3339 timestamp format
+        self.yesterday = '2022-02-21T00:00:00Z'  #str(datetime.date.today() - datetime.timedelta(days=1)) + 'T00:00:00Z'
         self.dataframe= None #dataframe to update
 
 #___________________________________________________________________________________________________________________________________________
@@ -43,12 +39,9 @@ class Scraper:
 
         ### Creation of query method using parameters###
 
-        #tweets_list= client.search_recent_tweets(query=text_query, tweet_fields=['text', 'created_at'], \
-        #                                         start_time= self.yesterday, end_time=self.today, max_results=self.max_results)
-
         for tweet in tweepy.Paginator(client.search_recent_tweets, query=text_query,tweet_fields=['text', 'created_at'],\
                                       start_time= self.yesterday, end_time=self.today, \
-                                      max_results=self.max_results).flatten(limit=200): #to use more than 100 tweets
+                                      max_results=self.max_results).flatten(limit=999): #to use more than 100 tweets
 
             #for tweet in tweets_list.data:
 
@@ -79,7 +72,7 @@ class Scraper:
         df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>2]))
 
         #lowercase text
-        df['clean_text'] = df['clean_text'].apply(lower)
+        df['clean_text']= df['clean_text'].apply(lower)
 
 #_________________________________________________________________________________________________________________________________________
 
@@ -104,13 +97,14 @@ class Scraper:
 
         date= df_final['created_at'][0].strftime('%Y-%m-%d') #convert timestamp to str
         file_name= f'{date}.csv'
-        df_final.to_csv(f'/home/lorisliusso/code/vivekjainmaiet/stockanalysis/raw_data/{file_name}')
+        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/daily_tweets/BTC/{file_name}')
+
 
 #________________________________________________________________________________________________________________________________________
 
 if __name__ == "__main__":
 
-    scraper = Scraper('apple Apple AAPL', 100)
+    scraper = Scraper('Bitcoin', 100)
     scraper.get_tweets()
     scraper.preprocess_tweets()
     scraper.create_sentiment()
