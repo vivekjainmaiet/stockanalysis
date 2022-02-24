@@ -35,8 +35,8 @@ def get_technical(symbol="INFY.NS",period = '5y'):
     df['macd_line'] = get_macd(df, fast=12, slow=26, signal=9)['MACDs_12_26_9']
     df['adx'] = get_adx(df, length=14)['ADX_14']
     df['vwap'] = get_vwap(df)
-
-    return df
+    cleaned_df = clean_data(df)
+    return cleaned_df
 
 def get_fundamental():
     '''returns a DataFrame of stock fundamental data'''
@@ -57,6 +57,7 @@ def get_recommendation():
 def clean_data(df, test=False):
     '''returns a DataFrame without outliers and missing values'''
     df = df.dropna(how='any')
+    df = df.reset_index()
     return df
 
 
@@ -64,9 +65,9 @@ if __name__ == '__main__':
     from stockanalysis.database import *
     db=MySQLDB()
     df = get_technical()
-    cleaned_df = clean_data(df)
-    cleaned_df = cleaned_df
-    cleaned_df.to_csv("raw_technical.csv", sep='\t', encoding='utf-8')
+    print(df)
+    #cleaned_df = cleaned_df
+    #cleaned_df.to_csv("raw_technical.csv", sep='\t', encoding='utf-8')
     #query = ("INSERT INTO stocksdb.TechnicalData (Date,StockID) "
     #"VALUES (%s, 1)")
     #db.SaveDFToTable(query, cleaned_df)
