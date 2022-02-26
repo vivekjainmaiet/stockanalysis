@@ -161,3 +161,7 @@ def split_predict(scaled_data, X):
     # x_train.shape
 
     return x_train, y_train
+
+
+def lower(text):
+    return text.lower()

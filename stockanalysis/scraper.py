@@ -1,5 +1,5 @@
 import tweepy
-import datetime as datetime
+from datetime import datetime,timedelta
 import pandas as pd
 import numpy as np
 from textblob import TextBlob
@@ -107,4 +107,5 @@ if __name__ == "__main__":
     scraper.get_tweets()
     scraper.preprocess_tweets()
     scraper.create_sentiment()
-    scraper.save_df()
+    df = scraper.save_df()
+    print(df)

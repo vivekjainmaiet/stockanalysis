@@ -13,6 +13,7 @@ pandas-ta
 yfinance
 textblob
 tensorflow
+pandas_datareader
 
 # tests/linter
 black
