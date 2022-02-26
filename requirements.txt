@@ -6,13 +6,13 @@ wheel>=0.29
 
 
 # data science
-numpy==1.22.2
-pandas==1.3.3
-scikit-learn==1.0.2
-pandas-ta==0.3.14b0
-yfinance==0.1.67
-textblob==0.17.1
-tensorflow==2.8.0
+numpy
+pandas
+scikit-learn
+pandas-ta
+yfinance
+textblob
+tensorflow
 
 # tests/linter
 black
