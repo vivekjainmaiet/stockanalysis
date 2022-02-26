@@ -8,7 +8,7 @@ wheel>=0.29
 # data science
 numpy
 pandas
-scikit-learn
+scikit-learn==1.0.2
 pandas-ta
 yfinance
 textblob
