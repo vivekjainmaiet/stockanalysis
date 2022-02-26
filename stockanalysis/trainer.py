@@ -115,7 +115,7 @@ class Trainer():
     # Function to create model, required for KerasClassifier
     def create_model(self, x_train):
         model = Sequential()
-        model.add(LSTM(128, return_sequences=True, input_shape= (x_train.shape[1], 1)))
+        model.add(LSTM(128, return_sequences=True, input_shape= (x_train.shape[1],1)))
         model.add(LSTM(64, return_sequences=False))
         model.add(Dense(25))
         model.add(Dense(1, activation='linear'))
