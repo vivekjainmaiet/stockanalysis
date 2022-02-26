@@ -37,7 +37,9 @@ class MoneyControl:
         for page in range(self.pages):
             soup = self.fetch_page(page)
             self.add_recommendation_to_dict(soup,recommendation_dict)
-        return pd.DataFrame.from_dict(recommendation_dict)
+        return create_sentiment(
+            clean_text(pd.DataFrame.from_dict(recommendation_dict),
+                       column='title'))
 
     def add_news_to_dict(self,soup, dict):
         for recmd_html in soup.find_all('div', {'class': 'MT15 PT10 PB10'}):
@@ -54,11 +56,11 @@ class MoneyControl:
         for page in range(self.pages):
             soup = self.fetch_page(page)
             self.add_news_to_dict(soup, news_dict)
-        return pd.DataFrame.from_dict(news_dict)
+        return create_sentiment(clean_text(pd.DataFrame.from_dict(news_dict), column='title'))
 
 if __name__ == "__main__":
     moneycontrol = MoneyControl('TCS', pages=2)
-    #df_recommendation= moneycontrol.create_recommendation_df()
-    #print(df_recommendation)
-    df_news = moneycontrol.create_news_df()
-    print(df_news['title'])
+    df_recommendation= moneycontrol.create_recommendation_df()
+    print(df_recommendation)
+    #df_news = moneycontrol.create_news_df()
+    #print(df_news)

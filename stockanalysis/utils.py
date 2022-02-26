@@ -10,6 +10,10 @@ def compute_rmse(y_pred, y_true):
     return np.sqrt(((y_pred - y_true) ** 2).mean())
 
 
+def compute_mpe(y_pred, y_true):
+    return abs(y_pred / y_true).mean()
+
+
 def get_sma(df, period=5, column='Close'):
     '''returns simple moving average of provide column and period'''
     return pta.sma(df[column],length=period)
