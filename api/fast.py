@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import mysql.connector as connection
 from stockanalysis.param import config
+from stockanalysis.data import *
 
 app = FastAPI()
 
@@ -24,7 +25,8 @@ def index():
                 stock="/stock?ticker=TCS",
                 technical="/technical?ticker=TCS",
                 news="/newslist?ticker=TCS",
-                recommendation="/recommendation?ticker=TCS")
+                recommendation="/recommendation?ticker=TCS",
+                prediction = "prediction?ticker='INFY.NS'&start='2017-01-01'&end='2022-02-24")
 
 
 @app.get("/stocklist")
@@ -88,9 +90,15 @@ def recommendation(ticker):  # 1
 
 
 @app.get("/prediction")
-def prediction(ticker):
+def prediction(ticker='INFY.NS', start="2017-01-01", end="2022-02-24"):
+    df = get_technical(symbol=ticker, start=start, end=end)
+    cleaned_data = clean_data(df.drop(columns=['Date']))
+    scaled_data,pipe = set_pipeline(cleaned_data)
+    X = cleaned_data.to_numpy()[-61:,:]
+    scaled_data = scaled_data[-61:,:]
+    X,y = split_predict(scaled_data,X)
     #Load model trainned model in previous stage to predict future price
-    model = joblib.load('/content/drive/MyDrive/Colab Notebooks/02_24_2022_20_37_30_model.joblib')
-    results = model.predict()
+    model = joblib.load('/Users/vivek/code/vivekjainmaiet/stockanalysis/api/model.joblib')
+    results = model.predict(X)
     pred = float(results[0])
-    return pred
+    return {"close":pred}

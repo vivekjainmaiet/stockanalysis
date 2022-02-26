@@ -3,7 +3,17 @@ import numpy as np
 import pandas as pd
 import pandas_ta as pta
 from textblob import TextBlob
-
+from datetime import datetime  # Get the stock quote
+from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn import set_config
+set_config(display='diagram')
+from sklearn.compose import ColumnTransformer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM
 
 def compute_rmse(y_pred, y_true):
     '''returns root mean square error'''
@@ -127,3 +137,29 @@ def create_sentiment(df):
     df['sentiment']= df['clean_text'].apply(string_to_sentiment)
     df=df.round(2) #round numbers to 2 decimals
     return df
+
+
+def split_predict(scaled_data, X):
+    # Create the training data set
+    # Create the scaled training data set
+    train_data = scaled_data
+    # Split the data into x_train and y_train data sets
+    x_train = []
+    y_train = []
+
+    for i in range(60, len(train_data)):
+        x_train.append(train_data[i - 60:i, 0])
+        y_train.append(X[i, 0])
+        if i <= 61:
+            print(x_train)
+            print(y_train)
+            print()
+
+    # Convert the x_train and y_train to numpy arrays
+    x_train, y_train = np.array(x_train), np.array(y_train)
+
+    # Reshape the data
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    # x_train.shape
+
+    return x_train, y_train

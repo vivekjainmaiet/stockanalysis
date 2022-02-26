@@ -1,9 +1,9 @@
 from stockanalysis.database import *
 from stockanalysis.param import config
-from stockanalysis.data import *
-from stockanalysis.moneycontrol import *
 import mysql.connector as connection
 from database import *
+from stockanalysis.data import *
+from stockanalysis.moneycontrol import *
 import datetime
 
 conn = connection.connect(**config)

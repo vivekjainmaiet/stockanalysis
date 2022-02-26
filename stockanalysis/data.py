@@ -9,7 +9,7 @@ from stockanalysis.utils import *
 from pandas_datareader import data as pdr
 yf.pdr_override()
 
-def get_technical(symbol="INFY.NS",start="2017-01-01", end="2022-04-30"):
+def get_technical(symbol="INFY.NS",start="2017-01-01", end="2021-04-30"):
     '''returns a DataFrame with stock technical data'''
     df = pdr.get_data_yahoo(symbol, start=start, end=end)
     df.drop(columns=['Adj Close'],inplace=True)
