@@ -181,4 +181,4 @@ if __name__ == "__main__":
     #Print Root Mean Square Error
     print(mpe)
     #Save Model
-    trainer.save_model_to_gcp(model, local_model_name="model.joblib")
+    trainer.save_model_to_gcp(model, local_model_name=f"{ticker}.joblib")

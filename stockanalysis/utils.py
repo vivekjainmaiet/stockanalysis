@@ -9,8 +9,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn import set_config
-set_config(display='diagram')
 from sklearn.compose import ColumnTransformer
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
