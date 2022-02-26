@@ -12,7 +12,7 @@ scikit-learn==1.0.2
 pandas-ta
 yfinance
 textblob
-tensorflow
+tensorflow==2.8.0
 pandas_datareader
 
 # tests/linter
