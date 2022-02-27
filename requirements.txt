@@ -31,7 +31,7 @@ tweepy
 
 # utilities
 six>=1.14
-joblib
+joblib==1.0.1
 memoized-property
 termcolor
 beautifulsoup4
