@@ -1,22 +1,27 @@
-import re
 import numpy as np
-import pandas_ta as pta
 import pandas as pd
-import joblib
-from datetime import datetime ,timedelta
+import re
+from datetime import datetime, timedelta
+
+import pandas_ta as pta
+
+
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import ColumnTransformer
+from sklearn.compose import make_column_selector
+
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
+
+import joblib
+from google.cloud import storage
+
 from stockanalysis.data import *
 from stockanalysis.encoder import *
 from stockanalysis.utils import *
-from sklearn.compose import make_column_selector
 from stockanalysis.param import *
-
-from google.cloud import storage
 
 
 class Trainer():
@@ -59,8 +64,11 @@ class Trainer():
                 print(y_train)
                 print()
 
-    # Convert the x_train and y_train to numpy arrays
+        # Convert the x_train and y_train to numpy arrays
         x_train, y_train = np.array(x_train), np.array(y_train)
+        # Reshape the data
+        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        # x_train.shape
         return x_train,y_train
 
     def split_test_timeseries(self, scaled_data, data):
@@ -83,6 +91,8 @@ class Trainer():
 
         # Convert the x_train and y_train to numpy arrays
         x_test, y_test = np.array(x_test), np.array(y_test)
+        # Reshape the data
+        x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
         return x_test,y_test
 
 
@@ -108,7 +118,8 @@ class Trainer():
         # Reshape the data
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
         # x_train.shape
-        print(y_train.shape)
+
+        #print(y_train.shape)
         return x_train,y_train
 
 
@@ -126,7 +137,7 @@ class Trainer():
     # implement train() function
     def train(self, x_train, y_train, model):
         '''returns a trained pipelined model'''
-        model.fit(x_train, y_train,epochs=5)
+        model.fit(x_train,y_train,epochs=5)
         return model
 
     # implement evaluate() function
