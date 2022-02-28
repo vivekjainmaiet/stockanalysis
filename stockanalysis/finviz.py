@@ -27,4 +27,4 @@ class FinViz:
 if __name__ == "__main__":
     finviz = FinViz('AAPL', max_results=10)
     df = finviz.get_finviz_news()
-    print(df)
+    print(df.columns)

@@ -15,39 +15,64 @@ query = f"SELECT * FROM stocksdb.StocksList;"
 mycursor.execute(query)
 stock_list = mycursor.fetchall()
 
+
 for stock in stock_list:
-    query = f"""
-    SELECT Date FROM stocksdb.raw_news where stock_id={stock['ID']} ORDER BY Date DESC LIMIT 1;
-    """
-    mycursor.execute(query)
-    stock_db_lastdate = mycursor.fetchone()
+    print(stock)
+    update = True
 
     if stock['exchange'] =='NASDAQ':
-        finviz = FinViz(stock['StockCode'], max_results=10)
+        query = f"""
+                SELECT Date FROM stocksdb.raw_news where stock_id={stock['ID']} ORDER BY date DESC LIMIT 1;
+                """
+        mycursor.execute(query)
+        stock_db_lastdate = mycursor.fetchone()
+        finviz = FinViz(stock['StockCode'])
         df_news = finviz.get_finviz_news()
+        if stock_db_lastdate == None:
+            df_news = df_news
+        else:
+            if len(df_news.index[df_news['date'] == stock_db_lastdate['Date']]) != 0:
+                index = df_news.index[df_news['date'] == stock_db_lastdate['Date']][0]
+                if (index == 0):
+                    print(f"{stock['StockCode']} news is already upto date.")
+                    update = False
+                else:
+                    df_news = df_news.head(index)
+            else:
+                print("Date time did not match")
+
 
     if (stock['exchange'] == 'BSE' or stock['exchange'] == 'NSE'):
-        moneycontrol = MoneyControl(stock['moneycontrol_code'], pages=2)
-        df_news = moneycontrol.create_news_df()
-
-
-    if stock_db_lastdate == None:
-        df_news = df_news
-    else:
-        last_date_in_DB = datetime.datetime.strptime(stock_db_lastdate['Date'],'%Y-%m-%d %H:%M:%S').date()
-        df_news = df_news.loc[(df_news['date'] > last_date_in_DB)]
-
-
-    for index, row in df_news.iterrows():
 
         query = f"""
-        INSERT INTO stocksdb.raw_news(ticker,date,title,text,source,url,clean_text,sentiment,stock_id)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        SELECT Date FROM stocksdb.raw_news where stock_id={stock['ID']} ORDER BY ID ASC LIMIT 1;
         """
-        mycursor.execute(
-            query,
-            (stock['StockCode'], row.date, row.title, row.text, row.source,
-             row.url, row.clean_text, row.sentiment, stock['ID']))
-        print(query)
+        mycursor.execute(query)
+        stock_db_lastdate = mycursor.fetchone()
 
-conn.commit()
+        moneycontrol = MoneyControl(stock['moneycontrol_code'], pages=2)
+        df_news = moneycontrol.create_news_df()
+        if stock_db_lastdate == None:
+            df_news = df_news
+        else:
+            index = df_news.index[df_news['date'] == stock_db_lastdate['Date']][0]
+            #First row
+            if index == 0:
+                print(f"{stock['StockCode']} news is already upto date.")
+                update = False
+            else:
+                df_news = df_news.head(index)
+
+
+    if update:
+        for index, row in df_news.iterrows():
+
+            query = f"""
+            INSERT INTO stocksdb.raw_news(ticker,date,title,text,source,url,clean_text,sentiment,stock_id)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """
+            mycursor.execute(
+                query,
+                (stock['StockCode'], str(row.date), row.title, row.text, row.source,
+                row.url, row.clean_text, row.sentiment, stock['ID']))
+        conn.commit()
