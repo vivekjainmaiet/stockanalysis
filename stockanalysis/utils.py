@@ -1,8 +1,8 @@
 import re
+from textblob import TextBlob
 import numpy as np
 import pandas as pd
 import pandas_ta as pta
-from textblob import TextBlob
 from datetime import datetime  # Get the stock quote
 from sklearn.model_selection import train_test_split
 from sklearn.base import BaseEstimator, TransformerMixin
