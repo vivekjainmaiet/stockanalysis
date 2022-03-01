@@ -55,6 +55,7 @@ def technical(ticker):  # 1
     query = f"SELECT * FROM stocksdb.StocksList where StockCode ='{ticker}';"
     mycursor.execute(query)
     stock = mycursor.fetchone()
+    
     stock_id = stock['ID']
     query = f"SELECT * FROM stocksdb.raw_technical where Stock_id = {stock_id}"
     mycursor.execute(query)

@@ -177,6 +177,7 @@ if __name__ == "__main__":
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     cleaned_data = get_technical(symbol=ticker, start=start_date, end=end_date)
     print(cleaned_data.head(10))
+    #breakpoint()
     #Scale the data
     scaled_data, pipe = trainer.set_pipeline(cleaned_data)
     print(scaled_data)
