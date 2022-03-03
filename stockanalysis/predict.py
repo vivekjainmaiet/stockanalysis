@@ -1,24 +1,21 @@
-import os
-from math import sqrt
-import numpy as np
-
+from stockanalysis.data import *
+from stockanalysis.utils import *
+from stockanalysis.param import *
 import joblib
-import pandas as pd
-from TaxiFareModel.params import MODEL_NAME
-from google.cloud import storage
-from sklearn.metrics import mean_absolute_error, mean_squared_error
-from datetime import datetime, timedelta
-from stockanalysis.data import get_technical
+import os
+
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.compose import make_column_selector
 
+from google.cloud import storage
 
 PATH_TO_LOCAL_MODEL = 'model.joblib'
 BUCKET_NAME = "one-stop-stock-analysis"
 
-def split_predict(scaled_data, data):
+
+def split_timeseries(scaled_data, X, sequence_size=21):
     # Create the training data set
     # Create the scaled training data set
     train_data = scaled_data
@@ -26,10 +23,10 @@ def split_predict(scaled_data, data):
     x_train = []
     y_train = []
 
-    for i in range(60, len(train_data)):
-        x_train.append(train_data[i-60:i, 0])
-        y_train.append(data[i])
-        if i<= 61:
+    for i in range(sequence_size, len(train_data)):
+        x_train.append(train_data[i - sequence_size:i, 0])
+        y_train.append(X[i, 0])
+        if i <= sequence_size+1:
             print(x_train)
             print(y_train)
             print()
@@ -41,31 +38,24 @@ def split_predict(scaled_data, data):
     x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     # x_train.shape
 
-    #print(y_train.shape)
-    return x_train,y_train
-
-def get_test_data(ticker="INFY.NS"):
-    start_date = (datetime.now() - timedelta(days=5 * 365)).strftime("%Y-%m-%d")
-    end_date = datetime.now().strftime("%Y-%m-%d")
-    df = get_technical(symbol=ticker, start=start_date, end=end_date)
-    return df
+    return x_train, y_train
 
 
 def set_pipeline(cleaned_data):
     '''returns a pipelined model'''
-    cleaned_data = cleaned_data[['Open', 'High', 'Low', 'Close', 'Volume',
-                       'ema12', 'ema21', 'ema26', 'ema34', 'ema55', 'ema99',
-                       'ema200', 'hma12', 'hma21', 'hma26', 'hma34', 'hma55',
-                       'hma99', 'hma200', 'rsi', 'atr', 'bb_upper', 'bb_lower',
-                       'macd_signal', 'macd_line', 'adx', 'vwap']]
-    scale = StandardScaler()
-    scaled_data = scale.fit_transform(cleaned_data)
-    return scaled_data, scale
+    data_pipe = Pipeline([('stdscaler', MinMaxScaler())])
+    preproc_pipe = ColumnTransformer(
+        [('data', data_pipe,
+          make_column_selector(dtype_include=["int64", "float64"]))],
+        remainder="drop")
+
+    pipe = Pipeline([('preproc', preproc_pipe)])
+
+    scaled_data = pipe.fit_transform(cleaned_data)
+    return scaled_data, pipe
 
 
-def download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',
-        bucket=BUCKET_NAME,
-        rm=True):
+def download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False):
     client = storage.Client().bucket(bucket)
     blob = client.blob(storage_location)
     blob.download_to_filename('model.joblib')
@@ -76,31 +66,22 @@ def download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.jobli
     return model
 
 
-def get_model(path_to_joblib="/Users/vivek/code/vivekjainmaiet/stockanalysis/model.joblib"):
-    model = joblib.load('model.joblib')
-    return model
+def prediction(ticker, start, end):
+    print(ticker, start, end)
+    df = get_technical(symbol=ticker, start=start, end=end)
+    print(df.tail(5))
+    cleaned_data = clean_data(df.drop(columns=['Date']))[COLUMNS]
+    scaled_data, pipe = set_pipeline(cleaned_data)
+    X = cleaned_data.to_numpy()[-61:, :]
+    scaled_data = scaled_data[-61:, :]
+    X, y = split_timeseries(scaled_data, X, sequence_size=SEQUENCE_SIZE)
+    #Load model trainned model in previous stage to predict future price
+    model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False)
+    #model = joblib.load('model.joblib')
+    results = model.predict(X)
+    pred = float(np.exp(results[0]))
+    return {"close": pred}
 
 
-def evaluate_model(y, y_pred):
-    MAE = round(mean_absolute_error(y, y_pred), 2)
-    RMSE = round(sqrt(mean_squared_error(y, y_pred)), 2)
-    res = {'MAE': MAE, 'RMSE': RMSE}
-    return res
-
-
-if __name__ == '__main__':
-    #model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,m=True)
-    model = get_model()
-    df = get_test_data()
-    cleaned_data = df.drop(columns=['Date']).tail(60)
-    scale = StandardScaler()
-    scaled_data = scale.fit_transform(cleaned_data)
-    print(scaled_data)
-    #x_test, y_test = split_predict(scaled_data,cleaned_data['Close'].to_numpy())
-    #X = cleaned_data.to_numpy()[-60:, :]
-    #breakpoint()
-    #X, y = split_predict(scaled_data, X)
-    #results = model.predict(X)
-    #pred = float(results)
-
-    #print(scale.inverse_transform(model.predict(scaled_data)))
+if __name__ == "__main__":
+    print(prediction(ticker="INFY.NS", start="2017-01-01", end="2022-03-02"))
