@@ -25,6 +25,9 @@ clean:
 	@rm -fr stockanalysis-*.dist-info
 	@rm -fr stockanalysis.egg-info
 
+
+
+
 install:
 	@pip install . -U
 

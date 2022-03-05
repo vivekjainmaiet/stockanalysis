@@ -2,6 +2,9 @@ import tweepy
 
 # Creating an API object
 # Creating an API object
+SEQUENCE_SIZE = 21
+PATIENCE = 10
+COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
 config = {
     'user': 'users',
     'password': '#Stocks@007#',
