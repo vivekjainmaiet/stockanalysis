@@ -1,10 +1,11 @@
 import tweepy
-import datetime as datetime
-import pandas as pd
-import numpy as np
 from param import *
 from sentiment import *
 from utils import *
+import pandas as pd
+import numpy as np
+import datetime
+
 import csv
 
 
@@ -14,7 +15,7 @@ import csv
 
 class Scraper:
 
-    def __init__(self, stock_name, max_results):
+    def __init__(self, stock_name,max_results):
         self.stock_name = stock_name
         self.max_results= max_results
 
@@ -31,18 +32,20 @@ class Scraper:
         '''Download tweets and store them into a Dataframe:
 
         stock_name => ('AAPL', 'AMZN' etc)
+        TCS TATA CONSULTANCY SERVICES
         since_date =>  '2022-02-09' e.g.
         until_date = '2022-02-10' e.g. #to calculate one specific day, set until-date as the next day
         max_tweets => limit of tweets to scrape'''
 
         output = [] #list of tweets
-        text_query = f'{self.stock_name} -is:retweet lang:en'  #no retweets
+        query = ' OR '.join(self.stock_name.split(","))
+        text_query = f'{query} -is:retweet lang:en'  #no retweets
 
         ### Creation of query method using parameters###
 
         for tweet in tweepy.Paginator(client.search_recent_tweets, query=text_query,tweet_fields=['text', 'created_at'],\
                                       start_time= self.yesterday, end_time=self.today, \
-                                      max_results=self.max_results).flatten(limit=100): #to use more than 100 tweets (max 2.000.000 per month)
+                                      max_results=100).flatten(limit=self.max_results): #to use more than 100 tweets (max 2.000.000 per month)
 
             #for tweet in tweets_list.data:
 
@@ -99,16 +102,17 @@ class Scraper:
         date= df_final['created_at'][0].strftime('%Y-%m-%d') #convert timestamp to str
         file_name= f'{date}.csv'
         #SAVE COMPLETE DF WITH TWEETS
-        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/daily_tweets/{self.stock_name}/{file_name}', index=False)
+        #df_final.to_csv(f'/Users/vivek/code/vivekjainmaiet/stockanalysis/raw_data/{self.stock_name}/{file_name}',index=False)
 
         #SAVE MAIN DF WITH ONLY NECESSARY DATA
 
         pos = df_final.sentiment[df_final.sentiment == 'pos'].count()
         neg = df_final.sentiment[df_final.sentiment == 'neg'].count()
         df_final=pd.DataFrame([{'Date':date,'pos':pos, 'neg':neg}])
+        return df_final
 
-        file_name_2= f'report_{date}_{self.stock_name}.csv'
-        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/reports/{file_name_2}',index=False)
+        #file_name_2= f'report_{date}_{self.stock_name}.csv'
+        #df_final.to_csv(f'/Users/vivek/code/vivekjainmaiet/stockanalysis/raw_data/{file_name_2}',index=False)
 
     #def write_sentiment_df(self):
 
@@ -130,10 +134,36 @@ class Scraper:
 #________________________________________________________________________________________________________________________________________
 
 if __name__ == "__main__":
+    ticker = 'AAPL'
 
-    scraper = Scraper('AAPL', 100)
+
+    #scraper.write_sentiment_df()
+
+from stockanalysis.database import *
+from stockanalysis.param import config
+import mysql.connector as connection
+
+conn = connection.connect(**config)
+mycursor = conn.cursor(dictionary=True)
+
+query = f"SELECT * FROM stocksdb.StocksList;"
+mycursor.execute(query)
+stock_list = mycursor.fetchall()
+
+
+for stock in stock_list:
+    scraper = Scraper(stock['twitter_code'], 3000)
     scraper.get_tweets()
     scraper.preprocess_tweets()
     scraper.create_sentiment()
-    scraper.save_df()
-    #scraper.write_sentiment_df()
+    df_twitter = scraper.save_df()
+    df_twitter['stock_id'] = stock['ID']
+    for index, row in df_twitter.iterrows():
+        query = f"""
+            INSERT INTO twitter_sentiment(Date,stock_id,neg,pos)
+            VALUES (%s,%s,%s,%s)
+            """
+        mycursor.execute(query, (row.Date, row.stock_id, row.neg, row.pos))
+    conn.commit()
+
+print("Done")

@@ -4,6 +4,7 @@ import tweepy
 # Creating an API object
 
 SEQUENCE_SIZE = 50
+Y_LEN = 7
 #pct_change, log, normal, diff
 TYPE_Y = 'log'
 PATIENCE = 50

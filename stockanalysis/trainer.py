@@ -57,7 +57,11 @@ class Trainer():
 
         return scaled_data,pipe
 
-    def split_timeseries(self, scaled_data, data, sequence_size=21):
+    def split_timeseries(self,
+                         scaled_data,
+                         data,
+                         sequence_size=21,
+                         y_len=Y_LEN):
         # Create the training data set
         # Create the scaled training data set
         train_data = scaled_data
@@ -68,19 +72,23 @@ class Trainer():
         y_train = []
 
         for i in range(sequence_size, len(train_data)):
+            if len(y[i:i+y_len]) < y_len:
+                break
+
             x_train.append(train_data[i - sequence_size:i, :])
-            y_train.append(y[i])
+            y_train.append(y[i:i+y_len])
+
             if i <= sequence_size+1:
                 # print(x_train)
                 # print(y_train)
                 print('i <= sequence_size+1')
 
-        
+
         # Convert the x_train and y_train to numpy arrays
         x_train, y_train = np.array(x_train), np.array(y_train)
         # Reshape the data
 
-        # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        #y_train = np.reshape(y_train, (y_train.shape[0],Y_LEN))
 
         # x_train.shape
         return x_train,y_train
@@ -109,7 +117,7 @@ class Trainer():
         model.add(layers.Dense(10, activation='relu'))
         model.add(layers.Dropout(0.2))
         # model.add(layers.Dense(y_train.shape[1], activation='relu'))
-        model.add(layers.Dense(1, activation='linear'))
+        model.add(layers.Dense(Y_LEN, activation='linear'))
         model.compile(loss='mse',optimizer=RMSprop(learning_rate=0.0075), metrics=['mae', 'mape'])
         # model.compile(loss='mse',optimizer='rmsprop', metrics=['mae', 'mape'])
         print(model.summary())
@@ -121,7 +129,7 @@ class Trainer():
     def train(self, X_train, y_train, model):
         '''returns a trained pipelined model'''
         es = EarlyStopping(patience=PATIENCE, restore_best_weights=True)
-
+        #breakpoint()
         train_size = 0.9
         train_sample = int(train_size * X_train.shape[0])
         X_train, y_train, X_val, y_val = X_train[:train_sample], y_train[:train_sample], X_train[train_sample:], y_train[train_sample:]
@@ -138,7 +146,7 @@ class Trainer():
         print(y_pred.shape)
         mpe = compute_mpe(y_pred, y_test)
 
-        residuos = y_test - y_pred 
+        residuos = y_test - y_pred
         r2_score_ = r2_score(y_test, y_pred)
         rmse = (residuos ** 2).mean() ** 0.5
         mean_absolute_error_ = abs(residuos).mean()
@@ -203,13 +211,13 @@ if __name__ == "__main__":
     # scaled_data_test = pipe_train.transform(df_test_dataset)
     # print(scaled_data_train, scaled_data_test)
     #Split data in trainning and testing
-    
+
     #Test
     X_train_dataset = df_train_dataset.to_numpy()
     X_test_dataset = df_test_dataset.to_numpy()
-    
-    
-    
+
+
+
     print('TYPE_Y : ',  TYPE_Y)
     if TYPE_Y == 'log':
         y_train=np.log(df_train_dataset['Close'].to_numpy())
@@ -223,18 +231,18 @@ if __name__ == "__main__":
     else:
         y_train=df_train_dataset['Close'].to_numpy()
         y_test=df_test_dataset['Close'].to_numpy()
-    
-    
+
+
     stationary_train = adfuller(y_train[~np.isnan(y_train)])[1]
     stationary_test = adfuller(y_test[~np.isnan(y_test)])[1]
-    
-    print(f''' 
+
+    print(f'''
           adfuller_train: {stationary_train},
           adfuller_test: {stationary_test}
           ''')
-    
-    
-    
+
+
+
     x_train, y_train = trainer.split_timeseries(X_train_dataset,
                                                 y_train,
                                                 sequence_size=SEQUENCE_SIZE)
@@ -250,7 +258,7 @@ if __name__ == "__main__":
     #Evaluate Model
     mpe = trainer.evaluate(x_test, y_test, model)
     #Print Root Mean Square Error
-    breakpoint()
+    #breakpoint()
     print(mpe)
     #Save Model
     trainer.save_model_to_gcp(model, local_model_name=f"{ticker}.joblib")
