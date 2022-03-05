@@ -24,7 +24,7 @@ def split_timeseries(scaled_data, X, sequence_size=21):
     y_train = []
 
     for i in range(sequence_size, len(train_data)):
-        x_train.append(train_data[i - sequence_size:i, 0])
+        x_train.append(train_data[i - sequence_size:i, :])
         y_train.append(X[i, 0])
         if i <= sequence_size+1:
             print(x_train)
@@ -35,7 +35,7 @@ def split_timeseries(scaled_data, X, sequence_size=21):
     x_train, y_train = np.array(x_train), np.array(y_train)
 
     # Reshape the data
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    #x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     # x_train.shape
 
     return x_train, y_train

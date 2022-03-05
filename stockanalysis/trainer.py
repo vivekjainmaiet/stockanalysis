@@ -11,6 +11,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.compose import make_column_selector
+from sklearn.metrics import r2_score,mean_squared_error,mean_absolute_error
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM
@@ -59,7 +60,7 @@ class Trainer():
         y_train = []
 
         for i in range(sequence_size, len(train_data)):
-            x_train.append(train_data[i - sequence_size:i, 0])
+            x_train.append(train_data[i - sequence_size:i, :])
             y_train.append(y[i])
             if i <= sequence_size+1:
                 print(x_train)
@@ -69,7 +70,7 @@ class Trainer():
         # Convert the x_train and y_train to numpy arrays
         x_train, y_train = np.array(x_train), np.array(y_train)
         # Reshape the data
-        x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+        #x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
         # x_train.shape
         return x_train,y_train
 
@@ -84,7 +85,7 @@ class Trainer():
         #model.compile(optimizer='adam', loss='mean_squared_error')
         #return model
         model = Sequential()
-        model.add(LSTM(50,return_sequences=True,activation='tanh',input_shape=(x_train.shape[1], 1)))
+        model.add(LSTM(50,return_sequences=True,activation='tanh',input_shape=(x_train.shape[1], x_train.shape[2])))
         model.add(LSTM(50, return_sequences=False, activation='tanh'))
         model.add(Dense(25, activation='relu'))
         model.add(Dense(1, activation='linear'))
@@ -100,7 +101,7 @@ class Trainer():
         train_sample = int(train_size * X_train.shape[0])
         X_train, y_train, X_val, y_val = X_train[:train_sample], y_train[:train_sample], X_train[train_sample:], y_train[train_sample:]
 
-        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, callbacks=es,batch_size=128)
+        model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=100, callbacks=es,batch_size=25)
         #model.fit(x_train,y_train,epochs=100,)
         return model
 
@@ -108,8 +109,22 @@ class Trainer():
     def evaluate(self, x_test, y_test, model):
         '''returns the value of the RMSE'''
         y_pred = model.predict(x_test)
+        print(y_pred.shape)
         mpe = compute_mpe(y_pred, y_test)
-        return mpe
+        residuos=y_test - y_pred
+        r2_score_ = r2_score(y_test,y_pred)
+        rmse=(residuos**2).mean()**0.5
+        mean_absolute_error_=abs(residuos).mean()
+        df_result = pd.DataFrame(y_pred,columns=['predicted'])
+        df_result['original'] = y_test
+        df_result['diff'] = df_result['predicted'] - df_result['original']
+        return {
+            "mpe": mpe,
+            "r2_score": r2_score_,
+            "rmse": rmse,
+            "mean_absolute_error_": mean_absolute_error_,
+            "result": df_result
+        }
 
     def save_model(self, model, path="model.joblib"):
         """Save the model into a .joblib format"""
@@ -170,6 +185,7 @@ if __name__ == "__main__":
     #Evaluate Model
     mpe = trainer.evaluate(x_test, y_test, model)
     #Print Root Mean Square Error
+    breakpoint()
     print(mpe)
     #Save Model
     trainer.save_model_to_gcp(model, local_model_name=f"{ticker}.joblib")
