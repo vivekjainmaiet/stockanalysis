@@ -11,7 +11,9 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.compose import ColumnTransformer
 from sklearn.compose import make_column_selector
+
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
+
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras import layers
@@ -77,7 +79,9 @@ class Trainer():
         # Convert the x_train and y_train to numpy arrays
         x_train, y_train = np.array(x_train), np.array(y_train)
         # Reshape the data
+
         # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+
         # x_train.shape
         return x_train,y_train
 
@@ -110,6 +114,7 @@ class Trainer():
         # model.compile(loss='mse',optimizer='rmsprop', metrics=['mae', 'mape'])
         print(model.summary())
         print(X_train.shape)
+
         return model
 
     # implement train() function
@@ -122,6 +127,7 @@ class Trainer():
         X_train, y_train, X_val, y_val = X_train[:train_sample], y_train[:train_sample], X_train[train_sample:], y_train[train_sample:]
 
         model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=500, callbacks=es,batch_size=128)
+
         #model.fit(x_train,y_train,epochs=100,)
         return model
 
@@ -129,7 +135,9 @@ class Trainer():
     def evaluate(self, x_test, y_test, model):
         '''returns the value of the RMSE'''
         y_pred = model.predict(x_test)
+        print(y_pred.shape)
         mpe = compute_mpe(y_pred, y_test)
+
         residuos = y_test - y_pred 
         r2_score_ = r2_score(y_test, y_pred)
         rmse = (residuos ** 2).mean() ** 0.5
@@ -151,6 +159,7 @@ class Trainer():
               mean_absolute_error = f{mean_absolute_error_}
               ''')
         return mpe
+
 
     def save_model(self, model, path="model.joblib"):
         """Save the model into a .joblib format"""
@@ -241,6 +250,7 @@ if __name__ == "__main__":
     #Evaluate Model
     mpe = trainer.evaluate(x_test, y_test, model)
     #Print Root Mean Square Error
+    breakpoint()
     print(mpe)
     #Save Model
     trainer.save_model_to_gcp(model, local_model_name=f"{ticker}.joblib")

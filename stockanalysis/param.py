@@ -2,6 +2,7 @@ import tweepy
 
 # Creating an API object
 # Creating an API object
+
 SEQUENCE_SIZE = 50
 #pct_change, log, normal, diff
 TYPE_Y = 'log'
@@ -12,6 +13,7 @@ PATIENCE = 50
 #        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
 COLUMNS = ['Volume', 'rsi','Close']
+
 config = {
     'user': 'users',
     'password': '#Stocks@007#',
