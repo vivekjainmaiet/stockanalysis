@@ -2,10 +2,9 @@ import tweepy
 import datetime as datetime
 import pandas as pd
 import numpy as np
-from keys import *
-from scraper import *
+from param import *
 from sentiment import *
-from text_preprocessing import *
+from utils import *
 import csv
 
 
@@ -68,7 +67,7 @@ class Scraper:
         df['clean_text'] = df['text'].apply(lower)
 
         # remove numbers,punctuation,spaces
-        df['clean_text'] = df['clean_text'].apply(clean_text)
+        df['clean_text'] = df['clean_text'].apply(clean_twitter_text)
 
         #remove stock name
         df['clean_text'] = df['clean_text'].str.replace(self.stock_name.lower(), "")
