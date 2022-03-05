@@ -1,12 +1,13 @@
-import re
-
-def remove_pattern(input_txt, pattern):
-    r = re.findall(pattern, input_txt)
-    for i in r:
-        input_txt = re.sub(i, '', input_txt)
-
-    return input_txt
-
+chars_to_remove= '€$!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~0123456789'
 
 def lower(text):
+
     return text.lower()
+
+
+def clean_text(text):
+
+    for punctuation in chars_to_remove:
+        text = text.replace(punctuation, ' ')
+
+    return text

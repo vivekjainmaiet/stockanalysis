@@ -2,7 +2,7 @@ from pickle import NONE
 import mysql.connector as connection
 from mysql.connector.constants import ClientFlag
 import pandas as pd
-from param import config
+from stockanalysis.param import config
 
 
 class MySQLDB:

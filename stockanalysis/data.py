@@ -1,17 +1,19 @@
 import pandas as pd
-import yfinance
+import yfinance as yf
 import numpy as np
 import pandas_ta as pta
 import tweepy
 import requests
 from bs4 import BeautifulSoup
-from utils import *
+from stockanalysis.utils import *
+from pandas_datareader import data as pdr
+yf.pdr_override()
 
-def get_technical(symbol="INFY.NS",period = '5y'):
+def get_technical(symbol="INFY.NS",start="2017-01-01", end="2021-04-30"):
     '''returns a DataFrame with stock technical data'''
-    ticker = yfinance.Ticker(symbol)
-    df = ticker.history(period = period)
-    df.drop(columns=['Dividends','Stock Splits'],inplace=True)
+    df = pdr.get_data_yahoo(symbol, start=start, end=end)
+    df.drop(columns=['Adj Close'],inplace=True)
+
     df['ema12'] = get_ema(df, column='Close', period=12)
     df['ema21'] = get_ema(df, column='Close', period=21)
     df['ema26'] = get_ema(df, column='Close', period=26)
@@ -35,8 +37,8 @@ def get_technical(symbol="INFY.NS",period = '5y'):
     df['macd_line'] = get_macd(df, fast=12, slow=26, signal=9)['MACDs_12_26_9']
     df['adx'] = get_adx(df, length=14)['ADX_14']
     df['vwap'] = get_vwap(df)
-
-    return df
+    cleaned_df = clean_data(df)
+    return cleaned_df
 
 def get_fundamental():
     '''returns a DataFrame of stock fundamental data'''
@@ -57,10 +59,41 @@ def get_recommendation():
 def clean_data(df, test=False):
     '''returns a DataFrame without outliers and missing values'''
     df = df.dropna(how='any')
+    df = df.reset_index()
     return df
 
 
 if __name__ == '__main__':
-    df = get_technical()
-    cleaned_df = clean_data(df)
-    print(cleaned_df)
+    from stockanalysis.database import *
+    import datetime
+    from dateutil.relativedelta import relativedelta
+
+    conn = connection.connect(**config)
+    mycursor = conn.cursor(dictionary=True)
+    query = f"""
+    SELECT Date FROM stocksdb.raw_technical where Stock_id=1 ORDER BY Date DESC LIMIT 1;
+    ;"""
+    mycursor.execute(query)
+    stock_db_lastdate = mycursor.fetchone()
+
+    if stock_db_lastdate == None:
+        end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        start_date = (datetime.datetime.now() - datetime.timedelta(days=5 * 365)).strftime("%Y-%m-%d")
+        df = get_technical(symbol="INFY.NS", start=start_date, end=end_date)
+        print(df)
+    else:
+        date_time_str = stock_db_lastdate['Date'].split()[0]
+        date_time_obj = datetime.strptime(date_time_str, '%Y/%m/%d')
+        end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        start_date = date_time_obj + datetime.timedelta(days=1)
+        df = get_technical(symbol="INFY.NS", start="2017-01-01", end="2022-04-30")
+        print(df)
+
+    #print(stock_db_lastdate['Date'].split()[0])
+    #df = get_technical()
+    #print(df)
+    #cleaned_df = cleaned_df
+    #cleaned_df.to_csv("raw_technical.csv", sep='\t', encoding='utf-8')
+    #query = ("INSERT INTO stocksdb.TechnicalData (Date,StockID) "
+    #"VALUES (%s, 1)")
+    #db.SaveDFToTable(query, cleaned_df)

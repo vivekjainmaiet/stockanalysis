@@ -1,13 +1,25 @@
 import re
+from textblob import TextBlob
 import numpy as np
 import pandas as pd
 import pandas_ta as pta
-from textblob import TextBlob
-
+from datetime import datetime  # Get the stock quote
+from sklearn.model_selection import train_test_split
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, LSTM
 
 def compute_rmse(y_pred, y_true):
     '''returns root mean square error'''
     return np.sqrt(((y_pred - y_true) ** 2).mean())
+
+
+def compute_mpe(y_pred, y_true):
+    return abs(y_pred / y_true).mean()
 
 
 def get_sma(df, period=5, column='Close'):
@@ -123,3 +135,19 @@ def create_sentiment(df):
     df['sentiment']= df['clean_text'].apply(string_to_sentiment)
     df=df.round(2) #round numbers to 2 decimals
     return df
+
+def lower(text):
+    return text.lower()
+
+
+def deEmojify(text):
+    regrex_pattern = re.compile(
+        pattern="["
+        u"\U0001F600-\U0001F64F"  # emoticons
+        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+        u"\U0001F680-\U0001F6FF"  # transport & map symbols
+        u"\U0001F1E0-\U0001F1FF"
+        u"\xF0\x9F\xAA\x82"  # flags (iOS)
+        "]+",
+        flags=re.UNICODE)
+    return regrex_pattern.sub(r'', text)

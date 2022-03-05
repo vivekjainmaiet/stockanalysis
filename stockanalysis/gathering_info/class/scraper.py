@@ -2,9 +2,12 @@ import tweepy
 import datetime as datetime
 import pandas as pd
 import numpy as np
-from textblob import TextBlob
-from param import *
-from utils import *
+from keys import *
+from scraper import *
+from sentiment import *
+from text_preprocessing import *
+import csv
+
 
 #-> (PREDICT)
 # MONDAY->TUESDAY->WEDNESDAY->THURSDAY->FRIDAY->MONDAY...
@@ -19,7 +22,7 @@ class Scraper:
         #GLOBAL CLASS ATTRIBUTES#
 
         self.today = str(datetime.date.today())+'T00:00:00Z'  #I need a  RFC 3339 timestamp format
-        self.yesterday = str(datetime.date.today() - datetime.timedelta(days=1)) + 'T00:00:00Z'
+        self.yesterday =  str(datetime.date.today() - datetime.timedelta(days=1)) + 'T00:00:00Z'
         self.dataframe= None #dataframe to update
 
 #___________________________________________________________________________________________________________________________________________
@@ -38,12 +41,9 @@ class Scraper:
 
         ### Creation of query method using parameters###
 
-        #tweets_list= client.search_recent_tweets(query=text_query, tweet_fields=['text', 'created_at'], \
-        #                                         start_time= self.yesterday, end_time=self.today, max_results=self.max_results)
-
         for tweet in tweepy.Paginator(client.search_recent_tweets, query=text_query,tweet_fields=['text', 'created_at'],\
                                       start_time= self.yesterday, end_time=self.today, \
-                                      max_results=self.max_results).flatten(limit=200): #to use more than 100 tweets
+                                      max_results=self.max_results).flatten(limit=100): #to use more than 100 tweets (max 2.000.000 per month)
 
             #for tweet in tweets_list.data:
 
@@ -64,47 +64,77 @@ class Scraper:
 
         df= self.dataframe
 
-        # remove twitter handles (@user)
-        df['clean_text'] = np.vectorize(remove_pattern)(df['text'], "@[\w]*")
+        #lowercase text
+        df['clean_text'] = df['text'].apply(lower)
 
-        # remove special characters, numbers, punctuations
-        df['clean_text'] = df['clean_text'].str.replace("[^a-zA-Z#]", " ")
+        # remove numbers,punctuation,spaces
+        df['clean_text'] = df['clean_text'].apply(clean_text)
 
-        #removing short words
-        df['clean_text'] = df['clean_text'].apply(lambda x: ' '.join([w for w in x.split() if len(w)>2]))
+        #remove stock name
+        df['clean_text'] = df['clean_text'].str.replace(self.stock_name.lower(), "")
+
+        #drop spam tweets (containing http or https words)
+        #df = df[df["clean_text"].str.contains("https|http") == False]
+
+
 
 #_________________________________________________________________________________________________________________________________________
 
     def create_sentiment(self):
 
-        '''Create sentiment from Tweets --> output range [-1,1]'''
+        '''Create sentiment from Tweets --> output range [-1,0,1]'''
 
         df= self.dataframe
 
-        df['sentiment']= df['clean_text'].apply(string_to_sentiment)
-
-        df=df.round(2) #round numbers to 2 decimals
+        df['sentiment']= df['clean_text'].apply(custom_sentiment_base)
 
 #_________________________________________________________________________________________________________________________________________
 
     def save_df(self):
 
-        '''save dataframe'''
+        '''save 2 dataframes'''
 
         #save df
         df_final=self.dataframe
 
         date= df_final['created_at'][0].strftime('%Y-%m-%d') #convert timestamp to str
         file_name= f'{date}.csv'
-        #df_final.to_csv(f'/Users/vivek/code/vivekjainmaiet/stockanalysis/{file_name}')
-        return df_final
+        #SAVE COMPLETE DF WITH TWEETS
+        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/daily_tweets/{self.stock_name}/{file_name}', index=False)
+
+        #SAVE MAIN DF WITH ONLY NECESSARY DATA
+
+        pos = df_final.sentiment[df_final.sentiment == 'pos'].count()
+        neg = df_final.sentiment[df_final.sentiment == 'neg'].count()
+        df_final=pd.DataFrame([{'Date':date,'pos':pos, 'neg':neg}])
+
+        file_name_2= f'report_{date}_{self.stock_name}.csv'
+        df_final.to_csv(f'/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/reports/{file_name_2}',index=False)
+
+    #def write_sentiment_df(self):
+
+    #    df= self.dataframe
+    #    pos = df.sentiment[df.sentiment == 'pos'].count()
+    #    neg = df.sentiment[df.sentiment == 'neg'].count()
+
+    #    # open the file in the write mode
+    #    with open(
+    #            '/home/lorisliusso/code/lorisliusso/twitter_project/Twitter/data/reports/report_AAPL.csv',
+    #            'w') as f:
+    #        # create the csv writer
+    #        writer = csv.writer(f)
+    #        # write a row to the csv file
+    #        date = df['created_at'][0].strftime('%Y-%m-%d')
+    #        row= f'{date},{pos},{neg}'
+    #        writer.writerow(row)
 
 #________________________________________________________________________________________________________________________________________
 
 if __name__ == "__main__":
 
-    scraper = Scraper('apple Apple AAPL', 100)
+    scraper = Scraper('AAPL', 100)
     scraper.get_tweets()
     scraper.preprocess_tweets()
     scraper.create_sentiment()
     scraper.save_df()
+    #scraper.write_sentiment_df()

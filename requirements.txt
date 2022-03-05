@@ -4,12 +4,16 @@ setuptools>=26
 twine
 wheel>=0.29
 
+
 # data science
 numpy
 pandas
-scikit-learn
-pandas_ta
+scikit-learn==1.0.2
+pandas-ta
 yfinance
+textblob
+tensorflow
+pandas_datareader
 
 # tests/linter
 black
@@ -20,14 +24,14 @@ yapf
 
 # API
 gcsfs
-google-cloud-storage
+google-cloud-storage==2.1.0
 mlflow
 s3fs
 tweepy
 
 # utilities
 six>=1.14
-joblib
+joblib==1.0.1
 memoized-property
 termcolor
 beautifulsoup4
