@@ -3,10 +3,9 @@ from stockanalysis.param import config
 import mysql.connector as connection
 from stockanalysis.database import *
 from stockanalysis.data import *
-from stockanalysis.moneycontrol import *
+from stockanalysis.gathering_info.classes.moneycontrol import *
 import datetime
-from stockanalysis.moneycontrol import *
-from stockanalysis.finviz import *
+from stockanalysis.gathering_info.classes.finviz import *
 
 conn = connection.connect(**config)
 mycursor = conn.cursor(dictionary=True)
@@ -50,13 +49,13 @@ for stock in stock_list:
         for index, row in df_recommendation.iterrows():
 
             query = f"""
-            INSERT INTO stocksdb.raw_recommendation(ticker,date,title,text,source,url,clean_text,sentiment,stock_id)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            INSERT INTO stocksdb.raw_recommendation(ticker,date,title,text,source,url,clean_text,sentiment,stock_id,advice,target,analyst)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             """
             mycursor.execute(
-                query,
-                (stock['StockCode'], row.date, row.title, row.text, row.source,
-                row.url, row.clean_text, row.sentiment, stock['ID']))
+                query, (stock['StockCode'], row.date, row.title, row.text,
+                        row.source, row.url, row.clean_text, row.sentiment,
+                        stock['ID'], row.advice, row.target, row.analyst))
         conn.commit()
 
 print("Done")

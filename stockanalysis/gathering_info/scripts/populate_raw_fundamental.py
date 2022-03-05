@@ -1,4 +1,4 @@
-from stockanalysis.tikcertape import *
+from stockanalysis.gathering_info.classes.tikcertape import *
 import mysql.connector as connection
 from stockanalysis.param import *
 

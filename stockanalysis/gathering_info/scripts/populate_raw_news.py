@@ -3,10 +3,9 @@ from stockanalysis.param import config
 import mysql.connector as connection
 from stockanalysis.database import *
 from stockanalysis.data import *
-from stockanalysis.moneycontrol import *
+from stockanalysis.gathering_info.classes.moneycontrol import *
 import datetime
-from stockanalysis.moneycontrol import *
-from stockanalysis.finviz import *
+from stockanalysis.gathering_info.classes.finviz import *
 
 conn = connection.connect(**config)
 mycursor = conn.cursor(dictionary=True)

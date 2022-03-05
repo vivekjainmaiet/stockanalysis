@@ -1,8 +1,7 @@
-from stockanalysis.utils import *
-from email.charset import Charset
-from stockanalysis.twitter import *
-from stockanalysis.param import config
 import mysql.connector as connection
+from stockanalysis import param
+from stockanalysis.gathering_info.classes.twitter import *
+from stockanalysis.param import *
 
 conn = connection.connect(**config)
 mycursor = conn.cursor(dictionary=True)
@@ -16,20 +15,23 @@ for stock in stock_list:
     update = True
 
     query = f"""
-    SELECT created_at FROM stocksdb.raw_tweets where stock_id={stock['ID']} ORDER BY ID DESC LIMIT 1;
+    SELECT Date FROM stocksdb.twitter_sentiment where stock_id={stock['ID']} ORDER BY ID DESC LIMIT 1;
     """
     mycursor.execute(query)
     stock_db_lastdate = mycursor.fetchone()
 
-    scraper = Scraper(stock['StockCode'], 10)
+    scraper = Scraper(stock['twitter_code'], 3000)
     scraper.get_tweets()
     scraper.preprocess_tweets()
-    df_tweets= scraper.create_sentiment()
+    scraper.create_sentiment()
+    df_tweets = scraper.save_df()
 
     if stock_db_lastdate == None:
         df_tweets = df_tweets
+        df_tweets['stock_id'] = stock['ID']
     else:
-        index = df_tweets.index[df_tweets['created_at'] == stock_db_lastdate['created_at']][0]
+        df_tweets['stock_id'] = stock['ID']
+        index = df_tweets.index[df_tweets['Date'] == stock_db_lastdate['Date']][0]
         #Last line of dataframe
         if df_tweets.shape[0] == index + 1:
             print(f"{stock['StockName']} tweets data is already upto date.")
@@ -39,13 +41,13 @@ for stock in stock_list:
             print(df_tweets)
 
     for index, row in df_tweets.iterrows():
-        print(row.text)
+        print(row)
         query = f"""
-        INSERT INTO stocksdb.raw_tweets(Stock_id,text,created_at,clean_text,sentiment)
-        VALUES (%s,%s,%s,%s,%s);
+        INSERT INTO twitter_sentiment(Date,stock_id,neg,pos)
+            VALUES (%s,%s,%s,%s);
         """
-        mycursor.execute(query, (stock['ID'], deEmojify(
-            row.text), str(row.created_at), row.clean_text, row.sentiment))
+        mycursor.execute(query, (row.Date, row.stock_id, row.neg, row.pos))
+
     if update :
         conn.commit()
     print("Done")

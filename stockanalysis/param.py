@@ -1,8 +1,8 @@
+#Import
 import tweepy
+from mysql.connector.constants import ClientFlag
 
-# Creating an API object
-# Creating an API object
-
+#model Global variable
 SEQUENCE_SIZE = 50
 Y_LEN = 7
 #pct_change, log, normal, diff
@@ -15,12 +15,24 @@ PATIENCE = 50
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
 COLUMNS = ['Volume', 'rsi','Close']
 
+
+#database config
 config = {
-    'user': 'users',
-    'password': '#Stocks@007#',
-    'host': '34.79.163.70',
-    'database': 'stocksdb'
+    'user':
+    'users',
+    'password':
+    '#Stocks@007#',
+    'host':
+    '34.79.163.70',
+    'database':
+    'stocksdb',
+    'client_flags': [ClientFlag.SSL],
+    'ssl_ca':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/server-ca.pem',
+    'ssl_cert':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-cert.pem',
+    'ssl_key':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-key.pem'
 }
+
+#Twitter API Luis
 client = tweepy.Client(
     bearer_token=
     'AAAAAAAAAAAAAAAAAAAAAD3fYgEAAAAAcMN%2BYuat3oqoeE%2BoADUe9ZPwbQM%3Dcj3qBljHJs5WVHHqzANEYp9fpOQjgVZIr0fV4stVQDAYrHinXA'

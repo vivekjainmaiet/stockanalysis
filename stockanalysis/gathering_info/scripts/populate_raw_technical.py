@@ -3,7 +3,7 @@ from stockanalysis.database import *
 from stockanalysis.param import config
 import mysql.connector as connection
 from stockanalysis.data import *
-from stockanalysis.moneycontrol import *
+from stockanalysis.gathering_info.classes.moneycontrol import *
 import datetime
 
 conn = connection.connect(**config)
