@@ -24,8 +24,8 @@ def split_timeseries(scaled_data, X, sequence_size=21):
     y_train = []
 
     for i in range(sequence_size, len(train_data)):
-        x_train.append(train_data[i - sequence_size:i, 0])
-        y_train.append(X[i, 0])
+        x_train.append(train_data[i - sequence_size:i, :])
+        y_train.append(X[i])
         if i <= sequence_size+1:
             print(x_train)
             print(y_train)
@@ -35,7 +35,7 @@ def split_timeseries(scaled_data, X, sequence_size=21):
     x_train, y_train = np.array(x_train), np.array(y_train)
 
     # Reshape the data
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
     # x_train.shape
 
     return x_train, y_train
@@ -67,20 +67,25 @@ def download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.jobli
 
 
 def prediction(ticker, start, end):
+    online = False
     print(ticker, start, end)
     df = get_technical(symbol=ticker, start=start, end=end)
     print(df.tail(5))
     cleaned_data = clean_data(df.drop(columns=['Date']))[COLUMNS]
-    scaled_data, pipe = set_pipeline(cleaned_data)
+    # breakpoint()
+    # scaled_data, pipe = set_pipeline(cleaned_data)
     X = cleaned_data.to_numpy()[-61:, :]
-    scaled_data = scaled_data[-61:, :]
-    X, y = split_timeseries(scaled_data, X, sequence_size=SEQUENCE_SIZE)
+    y = cleaned_data['Close'].to_numpy()[-61:]
+    # scaled_data = scaled_data[-61:, :]
+    X, y = split_timeseries(X, y, sequence_size=SEQUENCE_SIZE)
     #Load model trainned model in previous stage to predict future price
-    model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False)
-    #model = joblib.load('model.joblib')
+    if online == True:
+        model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False)
+
     results = model.predict(X)
     pred = float(np.exp(results[0]))
-    return {"close": pred}
+    # breakpoint()
+    return {"prediction": np.exp(results), 'actual_prices': y}
 
 
 if __name__ == "__main__":

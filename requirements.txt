@@ -14,6 +14,7 @@ yfinance
 textblob
 tensorflow
 pandas_datareader
+statsmodels==0.13.0
 
 # tests/linter
 black
