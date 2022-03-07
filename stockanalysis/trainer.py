@@ -110,15 +110,15 @@ class Trainer():
         normalizer.adapt(X_train) # "Fit" it on the train set
         model = Sequential()
         model.add(normalizer)
-        model.add(layers.LSTM(20, return_sequences=False, input_shape=(X_train.shape[1],X_train.shape[2])))
+        model.add(layers.LSTM(25, return_sequences=False, input_shape=(X_train.shape[1],X_train.shape[2])))
         # model.add(layers.LSTM(3, return_sequences=True, recurrent_dropout=0.3))
         # model.add(layers.LSTM(5))
         model.add(layers.Dropout(0.2))
-        model.add(layers.Dense(10, activation='relu'))
+        model.add(layers.Dense(15, activation='relu'))
         model.add(layers.Dropout(0.2))
         # model.add(layers.Dense(y_train.shape[1], activation='relu'))
         model.add(layers.Dense(Y_LEN, activation='linear'))
-        model.compile(loss='mse',optimizer=RMSprop(learning_rate=0.0075), metrics=['mae', 'mape'])
+        model.compile(loss='mse',optimizer=RMSprop(learning_rate=0.02), metrics=['mae', 'mape'])
         # model.compile(loss='mse',optimizer='rmsprop', metrics=['mae', 'mape'])
         print(model.summary())
         print(X_train.shape)
@@ -144,28 +144,25 @@ class Trainer():
         '''returns the value of the RMSE'''
         y_pred = model.predict(x_test)
         print(y_pred.shape)
-        mpe = compute_mpe(y_pred, y_test)
+        
 
-        residuos = y_test - y_pred
-        r2_score_ = r2_score(y_test, y_pred)
-        rmse = (residuos ** 2).mean() ** 0.5
-        mean_absolute_error_ = abs(residuos).mean()
-        df = pd.DataFrame({'y_true': y_test, 'y_pred': y_pred[:,0]})
-        df = df.apply(np.exp)
-        df['residuos'] = df['y_true'] - df['y_pred']
-        df['y_true'].plot(label = 'y_true')
-        df['y_pred'].plot(label = 'y_pred')
+        
+        if TYPE_Y == 'log':
+            y_test = np.exp(y_test)
+            y_pred = np.exp(y_pred)
+            residuos = y_test - y_pred
+                
+        
+        rmse = (residuos ** 2).mean(axis = 0) ** 0.5
+        mpe = abs(y_pred / y_test).mean(axis = 0)
+        mae = abs(y_pred - y_test).mean(axis = 0)
+        plt.plot(pd.Series(y_test[:,0]).pct_change(), label= 'y_test')
+        plt.plot(pd.Series(y_pred[:,0]).pct_change(), label= 'y_test')
+        plt.legend()
         plt.show()
-        df['residuos'].plot(label = 'residuos')
-        plt.show()
-        print(df.mean())
-        print(df.corr())
-        print(df.head())
-        print(f'''
-              r2_score = f{r2_score_},
-              rmse = f{rmse}
-              mean_absolute_error = f{mean_absolute_error_}
-              ''')
+        breakpoint()
+
+       
         return mpe
 
 
@@ -197,8 +194,10 @@ if __name__ == "__main__":
     #Get Data
     start_date = (datetime.datetime.now() - datetime.timedelta(days=5 * 365)).strftime("%Y-%m-%d")
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
-    cleaned_data = get_technical(symbol=ticker, start=start_date,
-                                 end=end_date)[COLUMNS]
+    cleaned_data_all = get_technical(symbol=ticker, start=start_date,
+                                 end=end_date)
+    
+    cleaned_data = cleaned_data_all[COLUMNS]
     print(cleaned_data.head(10))
 
     # Time Serie split

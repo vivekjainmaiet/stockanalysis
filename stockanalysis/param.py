@@ -4,7 +4,7 @@ import tweepy
 # Creating an API object
 
 SEQUENCE_SIZE = 50
-Y_LEN = 7
+Y_LEN = 2
 #pct_change, log, normal, diff
 TYPE_Y = 'log'
 PATIENCE = 50
@@ -13,7 +13,7 @@ PATIENCE = 50
 #        'hma34', 'hma55', 'hma99', 'hma200', 'rsi', 'atr', 'bb_upper',
 #        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
-COLUMNS = ['Volume', 'rsi','Close']
+COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21']
 
 config = {
     'user': 'users',
