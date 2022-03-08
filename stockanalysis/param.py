@@ -4,7 +4,7 @@ from mysql.connector.constants import ClientFlag
 
 #model Global variable
 SEQUENCE_SIZE = 50
-Y_LEN = 2
+Y_LEN = 15
 #pct_change, log, normal, diff
 TYPE_Y = 'log'
 PATIENCE = 50
@@ -13,7 +13,7 @@ PATIENCE = 50
 #        'hma34', 'hma55', 'hma99', 'hma200', 'rsi', 'atr', 'bb_upper',
 #        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
-COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21']
+COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21', 'macd_signal']
 
 
 #database config
