@@ -19,7 +19,7 @@ def compute_rmse(y_pred, y_true):
 
 
 def compute_mpe(y_pred, y_true):
-    return abs(y_pred / y_true).mean()
+    return 1 - abs(y_pred / y_true).mean()
 
 
 def get_sma(df, period=5, column='Close'):

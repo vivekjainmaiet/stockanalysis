@@ -82,13 +82,16 @@ def prediction(ticker, start, end):
     y = cleaned_data['Close'].to_numpy()[-61:]
     # scaled_data = scaled_data[-61:, :]
     X, y = split_timeseries(X, y, sequence_size=SEQUENCE_SIZE)
+    breakpoint()
     #Load model trainned model in previous stage to predict future price
     if online == True:
         model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False)
+    else:
+        model = joblib.load('INFY.NS.joblib')
 
     results = model.predict(X)
     pred = float(np.exp(results[0]))
-    # breakpoint()
+    breakpoint()
     return {"prediction": np.exp(results), 'actual_prices': y}
 
 
