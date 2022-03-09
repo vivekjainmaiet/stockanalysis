@@ -163,6 +163,7 @@ class Trainer():
         df_max_total_errors_pct = (df_pred - df_test).max(axis = 0) * 100
         df_min_total_errors_pct = (df_pred - df_test).min(axis = 0) * 100
         
+        
         #Ploting
         fig = plt.figure(figsize= (15,30))
         for i in range(1,Y_LEN):
