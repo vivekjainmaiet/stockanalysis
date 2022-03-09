@@ -15,32 +15,26 @@ PATH_TO_LOCAL_MODEL = 'model.joblib'
 BUCKET_NAME = "one-stop-stock-analysis"
 
 
-def split_timeseries(scaled_data, X, sequence_size=21):
+def split_timeseries(y, X, sequence_size=21):
     # Create the training data set
     # Create the scaled training data set
-    train_data = scaled_data
+    train_data = y
     # Split the data into x_train and y_train data sets
     x_train = []
     y_train = []
 
     for i in range(sequence_size, len(train_data)):
+        
         x_train.append(train_data[i - sequence_size:i, :])
-
         y_train.append(X[i])
 
         if i <= sequence_size+1:
-            print(x_train)
-            print(y_train)
-            print()
+            # print(x_train)
+            # print(y_train)
+            print('i <= sequence_size+1')
 
     # Convert the x_train and y_train to numpy arrays
     x_train, y_train = np.array(x_train), np.array(y_train)
-
-    # Reshape the data
-
-    # x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
-
-    # x_train.shape
 
     return x_train, y_train
 
@@ -71,29 +65,44 @@ def download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.jobli
 
 
 def prediction(ticker, start, end):
+    #Importing Information
     online = False
     print(ticker, start, end)
     df = get_technical(symbol=ticker, start=start, end=end)
     print(df.tail(5))
     cleaned_data = clean_data(df.drop(columns=['Date']))[COLUMNS]
-    # breakpoint()
-    # scaled_data, pipe = set_pipeline(cleaned_data)
-    X = cleaned_data.to_numpy()[-61:, :]
-    y = cleaned_data['Close'].to_numpy()[-61:]
-    # scaled_data = scaled_data[-61:, :]
+    
+    #Creating Sequence to pass to the prediction
+    X = cleaned_data.to_numpy()[-(SEQUENCE_SIZE+1):, :]
+    y = cleaned_data['Close'].to_numpy()[-(SEQUENCE_SIZE+1):]
     X, y = split_timeseries(X, y, sequence_size=SEQUENCE_SIZE)
-    breakpoint()
+    
     #Load model trainned model in previous stage to predict future price
     if online == True:
-        model = download_model(storage_location='models/stockanalysis/Pipeline/INFY.NS.joblib',bucket=BUCKET_NAME,rm=False)
+        model = download_model(storage_location=f'models/stockanalysis/Pipeline/{ticker}.joblib',bucket=BUCKET_NAME,rm=False)
     else:
-        model = joblib.load('INFY.NS.joblib')
-
+        model = joblib.load(f'{ticker}.joblib')
+    
+    #Model results
     results = model.predict(X)
-    pred = float(np.exp(results[0]))
-    breakpoint()
-    return {"prediction": np.exp(results), 'actual_prices': y}
+    
+    pred_values = np.exp(results[0])
+    pct_change_predictions = pd.Series(np.exp(results[0])).pct_change() * 100
+    cumsum_pctchange_predictions = pct_change_predictions.cumsum()
+    
+    
+    
+    return {"prediction": pred_values, 
+            'actual_prices': y, 
+            'pct_change_predictions': pct_change_predictions,
+            'cumsum_pctchange_predictions': cumsum_pctchange_predictions
+           }
 
 
 if __name__ == "__main__":
-    print(prediction(ticker="INFY.NS", start="2017-01-01", end="2022-03-02"))
+    import datetime
+    end_date = datetime.datetime.now().strftime("%Y-%m-%d")
+    start_date = (datetime.datetime.now() - datetime.timedelta(days=5 * 365)).strftime("%Y-%m-%d")
+    ticker = "INFY.NS"
+    print(start_date, end_date)
+    print(prediction(ticker=ticker, start=start_date, end=end_date))
