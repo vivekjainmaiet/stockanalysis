@@ -144,15 +144,15 @@ class Trainer():
         '''returns the value of the RMSE'''
         y_pred = model.predict(x_test)
         print(y_pred.shape)
-        
 
-        
+
+
         if TYPE_Y == 'log':
             y_test = np.exp(y_test)
             y_pred = np.exp(y_pred)
             residuos = y_test - y_pred
-                
-        
+
+
         rmse = (residuos ** 2).mean(axis = 0) ** 0.5
         mpe = abs(y_pred / y_test).mean(axis = 0)
         mae = abs(y_pred - y_test).mean(axis = 0)
@@ -160,9 +160,9 @@ class Trainer():
         plt.plot(pd.Series(y_pred[:,0]).pct_change(), label= 'y_test')
         plt.legend()
         plt.show()
-        breakpoint()
+        #breakpoint()
 
-       
+
         return mpe
 
 
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     cleaned_data_all = get_technical(symbol=ticker, start=start_date,
                                  end=end_date)
-    
+
     cleaned_data = cleaned_data_all[COLUMNS]
     print(cleaned_data.head(10))
 

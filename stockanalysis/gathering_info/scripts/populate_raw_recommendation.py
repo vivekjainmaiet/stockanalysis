@@ -22,10 +22,25 @@ for stock in stock_list:
     """
     mycursor.execute(query)
     stock_db_lastdate = mycursor.fetchone()
-
     if stock['exchange'] == 'NASDAQ':
-        print("No resource coded for NASDAQ recommendation call yet.")
-        update = False
+        finviz = FinViz(stock['StockCode'], max_results=10)
+        df_recommendation= finviz.get_finviz_recommendations()
+        print(df_recommendation)
+
+
+        if stock_db_lastdate == None:
+            df_recommendation = df_recommendation
+        else:
+            last_date_in_DB = stock_db_lastdate['Date']
+            index = df_recommendation.index[df_recommendation['date'] ==
+                                            last_date_in_DB][0]
+
+            #First row
+            if index == 0:
+                print(f"{stock['StockName']} recommendation is already upto date.")
+                update = False
+            else:
+                df_recommendation = df_recommendation.head(index)
 
     if (stock['exchange'] == 'BSE' or stock['exchange'] == 'NSE'):
         moneycontrol = MoneyControl(stock['moneycontrol_code'], pages=2)
