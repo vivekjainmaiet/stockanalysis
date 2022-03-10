@@ -151,17 +151,57 @@ class Trainer():
             y_test = np.exp(y_test)
             y_pred = np.exp(y_pred)
             residuos = y_test - y_pred
+<<<<<<< HEAD
 
 
+=======
+                
+        #Metrics
+>>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
         rmse = (residuos ** 2).mean(axis = 0) ** 0.5
         mpe = abs(y_pred / y_test).mean(axis = 0)
         mae = abs(y_pred - y_test).mean(axis = 0)
-        plt.plot(pd.Series(y_test[:,0]).pct_change(), label= 'y_test')
-        plt.plot(pd.Series(y_pred[:,0]).pct_change(), label= 'y_test')
-        plt.legend()
+        df_pred = pd.DataFrame(y_pred).pct_change()
+        df_test = pd.DataFrame(y_test).pct_change()
+        df_sum_total_errors_pct = (df_pred - df_test).sum(axis = 0) * 100
+        df_mean_total_errors_pct = (df_pred - df_test).mean(axis = 0) * 100
+        df_max_total_errors_pct = (df_pred - df_test).max(axis = 0) * 100
+        df_min_total_errors_pct = (df_pred - df_test).min(axis = 0) * 100
+        
+        
+        #Ploting
+        fig = plt.figure(figsize= (15,30))
+        for i in range(1,Y_LEN):
+            if i == 1:
+                count = i
+            else:
+                count +=1
+            #Original scale plot
+            axs = fig.add_subplot(Y_LEN,2,count)
+            axs.set_title = f'{i} days in the future'
+            axs.plot(y_test[:,i-1], label= 'y_test')
+            axs.plot(y_pred[:,i-1], label= 'y_pred')
+            plt.legend()
+            #Pct_change plot
+            count +=1
+            axs = fig.add_subplot(Y_LEN,2,count)
+            axs.plot(df_pred.to_numpy()[:,i-1], label= 'y_test')
+            axs.plot(df_test.to_numpy()[:,i-1], label= 'y_pred')
+            plt.legend()
+        # for i in range(1,Y_LEN):
+        #     axs = fig.add_subplot(Y_LEN,1,i)
+        #     axs.set_title = f'{i} days in the future'
+        #     axs.plot(y_test[:,i-1], label= 'y_test')
+        #     axs.plot(y_pred[:,i-1], label= 'y_pred')
+        #     plt.legend()
+
         plt.show()
+<<<<<<< HEAD
         #breakpoint()
 
+=======
+        # breakpoint()
+>>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
 
         return mpe
 
@@ -196,7 +236,12 @@ if __name__ == "__main__":
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     cleaned_data_all = get_technical(symbol=ticker, start=start_date,
                                  end=end_date)
+<<<<<<< HEAD
 
+=======
+    # breakpoint()
+    
+>>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
     cleaned_data = cleaned_data_all[COLUMNS]
     print(cleaned_data.head(10))
 

@@ -19,7 +19,7 @@ def compute_rmse(y_pred, y_true):
 
 
 def compute_mpe(y_pred, y_true):
-    return abs(y_pred / y_true).mean()
+    return 1 - abs(y_pred / y_true).mean()
 
 
 def get_sma(df, period=5, column='Close'):
@@ -167,3 +167,53 @@ def clean_twitter_text(text):
         text = text.replace(punctuation, ' ')
 
     return text
+
+
+#Plots Utils
+import matplotlib.pyplot as plt
+import seaborn as sns
+def indicators_plot(cleaned_data, indicators, figsize = (15,25)):
+    '''
+        Function used to make historical analysis of the indicators of a given stock
+        has the dependency on matplotlib and seaborn libraries
+        
+        cleaned_data needs to be a dataframe containing a datetime index
+        
+        Indicators needs to be a list like the one below
+        indicators = ['Volume','rsi', 'atr', 'bb_upper',
+        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
+    '''
+    fig = plt.figure(figsize= figsize)
+    count = 0
+    for column in indicators:
+        mean = cleaned_data[column].mean()
+        std = cleaned_data[column].std()
+        two_above_std = mean + 2 * std
+        two_below_std =  mean - 2 * std
+        
+        count +=1
+        #Indicator Graph
+        axs = fig.add_subplot(len(indicators),2,count)
+        
+        axs.plot(cleaned_data['Close'].pct_change().cumsum() * 100)
+        for element in cleaned_data[cleaned_data[column]> two_above_std].reset_index().to_numpy(): 
+
+
+            axs.axvline(element[0], color = 'green')
+
+        for element in cleaned_data[cleaned_data[column]< two_below_std].reset_index().to_numpy(): 
+
+
+            axs.axvline(element[0], color = 'red')
+
+        axs.plot(cleaned_data['rsi'], color = 'orange', label = column)
+        plt.grid()
+        
+        plt.legend()
+        #Distribution of the indicator
+        count +=1
+        axs = fig.add_subplot(len(indicators),2,count)
+        axs = sns.kdeplot(cleaned_data[column])
+        axs.axvline(mean, color = 'orange')
+        axs.axvline(two_below_std, color = 'red')
+        axs.axvline(two_above_std, color = 'green')

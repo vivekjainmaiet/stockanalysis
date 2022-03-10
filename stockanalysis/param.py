@@ -1,10 +1,10 @@
 #Import
 import tweepy
-from mysql.connector.constants import ClientFlag
+# from mysql.connector.constants import ClientFlag
 
 #model Global variable
 SEQUENCE_SIZE = 50
-Y_LEN = 2
+Y_LEN = 15
 #pct_change, log, normal, diff
 TYPE_Y = 'log'
 PATIENCE = 50
@@ -13,24 +13,24 @@ PATIENCE = 50
 #        'hma34', 'hma55', 'hma99', 'hma200', 'rsi', 'atr', 'bb_upper',
 #        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
-COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21']
+COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21', 'macd_signal']
 
 
 #database config
-config = {
-    'user':
-    'users',
-    'password':
-    '#Stocks@007#',
-    'host':
-    '34.79.163.70',
-    'database':
-    'stocksdb',
-    'client_flags': [ClientFlag.SSL],
-    'ssl_ca':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/server-ca.pem',
-    'ssl_cert':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-cert.pem',
-    'ssl_key':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-key.pem'
-}
+# config = {
+#     'user':
+#     'users',
+#     'password':
+#     '#Stocks@007#',
+#     'host':
+#     '34.79.163.70',
+#     'database':
+#     'stocksdb',
+#     'client_flags': [ClientFlag.SSL],
+#     'ssl_ca':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/server-ca.pem',
+#     'ssl_cert':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-cert.pem',
+#     'ssl_key':'/Users/vivek/code/vivekjainmaiet/stockanalysis/stockanalysis/ssl/client-key.pem'
+# }
 
 #Twitter API Luis
 client = tweepy.Client(
