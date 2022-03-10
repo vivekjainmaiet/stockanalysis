@@ -151,13 +151,8 @@ class Trainer():
             y_test = np.exp(y_test)
             y_pred = np.exp(y_pred)
             residuos = y_test - y_pred
-<<<<<<< HEAD
 
 
-=======
-                
-        #Metrics
->>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
         rmse = (residuos ** 2).mean(axis = 0) ** 0.5
         mpe = abs(y_pred / y_test).mean(axis = 0)
         mae = abs(y_pred - y_test).mean(axis = 0)
@@ -167,8 +162,8 @@ class Trainer():
         df_mean_total_errors_pct = (df_pred - df_test).mean(axis = 0) * 100
         df_max_total_errors_pct = (df_pred - df_test).max(axis = 0) * 100
         df_min_total_errors_pct = (df_pred - df_test).min(axis = 0) * 100
-        
-        
+
+
         #Ploting
         fig = plt.figure(figsize= (15,30))
         for i in range(1,Y_LEN):
@@ -196,12 +191,8 @@ class Trainer():
         #     plt.legend()
 
         plt.show()
-<<<<<<< HEAD
         #breakpoint()
 
-=======
-        # breakpoint()
->>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
 
         return mpe
 
@@ -229,19 +220,13 @@ class Trainer():
 if __name__ == "__main__":
     import datetime
     #define stock code to train the model
-    ticker = "INFY.NS"
+    ticker = "AAPL"
     trainer = Trainer(ticker=ticker)
     #Get Data
     start_date = (datetime.datetime.now() - datetime.timedelta(days=5 * 365)).strftime("%Y-%m-%d")
     end_date = datetime.datetime.now().strftime("%Y-%m-%d")
     cleaned_data_all = get_technical(symbol=ticker, start=start_date,
                                  end=end_date)
-<<<<<<< HEAD
-
-=======
-    # breakpoint()
-    
->>>>>>> e41f2725095a541218393a79fd92a9afbc69214e
     cleaned_data = cleaned_data_all[COLUMNS]
     print(cleaned_data.head(10))
 
