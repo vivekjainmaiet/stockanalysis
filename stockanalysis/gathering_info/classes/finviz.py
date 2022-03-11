@@ -34,47 +34,45 @@ class FinViz:
         req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         webpage = urlopen(req).read()
         html = soup(webpage, "html.parser")
+
+        recommendation = {"data":[]}
+        for f in html.find_all('td', {'class': 'fullview-ratings-inner'}):
+            for tr in f.find_all('table'):
+                for td in tr.find_all('td'):
+                    recommendation["data"].append(td.text)
+
         list_recommendation = []
-        for recommendation in html.find_all(
-                'tr', {'class': 'body-table-rating-upgrade'}):
-            list_recommendation.append(recommendation.text)
+        for i in range(0,len(recommendation['data']),5):
+            list_recommendation.append(recommendation['data'][i:i+5])
 
-        for recommendation in html.find_all(
-                'tr', {'class': 'body-table-rating-neutral'}):
-            list_recommendation.append(recommendation.text)
-
-            mystring = list_recommendation[0].split("\n")[1]
 
         recommendation_dict = {
-            'ticker': [],
-            'date': [],
-            'title': [],
-            'text': [],
-            'source': [],
-            'url': [],
-            'advice': [],
-            'target': [],
-            'analyst': [],
-            'sentiment': [],
-            'clean_text': []
+        'ticker': [],
+        'date': [],
+        'title': [],
+        'text': [],
+        'source': [],
+        'url': [],
+        'advice': [],
+        'target': [],
+        'analyst': []
         }
-        mo = re.match('.+([0-9])[^0-9]*$', mystring)
+
 
         for value in list_recommendation:
             recommendation_dict['ticker'].append(self.ticker)
-            recommendation_dict['date'].append(list_recommendation[0].split("\n")[1][:mo.start(1) + 1])
-            recommendation_dict['title'].append("NULL")
-            recommendation_dict['text'].append("NULL")
-            recommendation_dict['sentiment'].append(0)
-            recommendation_dict['clean_text'].append("NULL")
-            recommendation_dict['url'].append(f"https://finviz.com/quote.ashx?t=self.ticker{self.ticker}")
-            recommendation_dict['source'].append("finviz")
-            recommendation_dict['advice'].append(list_recommendation[0].split("\n")[1][mo.start(1) + 1:])
-            recommendation_dict['analyst'].append(value.split("\n")[1])
-            recommendation_dict['target'].append(value.split("\n")[3])
+            recommendation_dict['date'].append(value[0])
+            recommendation_dict['title'].append(value[1])
+            recommendation_dict['source'].append("FinViz")
+            recommendation_dict['url'].append(
+                f"https://finviz.com/quote.ashx?t={self.ticker}")
+            recommendation_dict['analyst'].append(value[2])
+            recommendation_dict['advice'].append(value[3])
+            recommendation_dict['text'].append(value[3])
+            recommendation_dict['target'].append(value[4])
 
 
-        return pd.DataFrame(recommendation_dict)
+        return create_sentiment(clean_text(pd.DataFrame(recommendation_dict), column='text'))
 
 
 if __name__ == "__main__":
