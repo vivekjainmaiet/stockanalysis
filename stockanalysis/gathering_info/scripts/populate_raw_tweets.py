@@ -26,19 +26,18 @@ for stock in stock_list:
     scraper.create_sentiment()
     df_tweets = scraper.save_df()
 
-    if stock_db_lastdate == None:
+    if stock_db_lastdate['Date'] == None:
         df_tweets = df_tweets
         df_tweets['stock_id'] = stock['ID']
     else:
         df_tweets['stock_id'] = stock['ID']
-        index = df_tweets.index[df_tweets['Date'] == stock_db_lastdate['Date']][0]
-        #Last line of dataframe
-        if df_tweets.shape[0] == index + 1:
+
+        #breakpoint()
+        if df_tweets['Date'][0] == stock_db_lastdate['Date']:
             print(f"{stock['StockName']} tweets data is already upto date.")
             update = False
         else:
-            df_tweets = df_tweets.tail(df_tweets.shape[0] - (index + 1))
-            print(df_tweets)
+            df_tweets = df_tweets
 
     for index, row in df_tweets.iterrows():
         print(row)

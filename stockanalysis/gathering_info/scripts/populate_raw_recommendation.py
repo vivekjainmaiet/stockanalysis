@@ -32,8 +32,8 @@ for stock in stock_list:
             df_recommendation = df_recommendation
         else:
             last_date_in_DB = stock_db_lastdate['Date']
-            index = df_recommendation.index[df_recommendation['date'] ==
-                                            last_date_in_DB][0]
+            #breakpoint()
+            index = df_recommendation.index[df_recommendation['date'] ==last_date_in_DB][0]
 
             #First row
             if index == 0:
@@ -46,18 +46,18 @@ for stock in stock_list:
         moneycontrol = MoneyControl(stock['moneycontrol_code'], pages=2)
         df_recommendation = moneycontrol.create_recommendation_df()
 
-    if stock_db_lastdate == None:
-        df_recommendation = df_recommendation
-    else:
-        last_date_in_DB = stock_db_lastdate['Date']
-        index = df_recommendation.index[df_recommendation['date'] == last_date_in_DB][0]
-
-        #First row
-        if index == 0:
-            print(f"{stock['StockName']} recommendation is already upto date.")
-            update = False
+        if stock_db_lastdate == None:
+            df_recommendation = df_recommendation
         else:
-            df_recommendation = df_recommendation.head(index)
+            last_date_in_DB = stock_db_lastdate['Date']
+            index = df_recommendation.index[df_recommendation['date'] == last_date_in_DB][0]
+
+            #First row
+            if index == 0:
+                print(f"{stock['StockName']} recommendation is already upto date.")
+                update = False
+            else:
+                df_recommendation = df_recommendation.head(index)
 
 
     if update:
@@ -72,5 +72,6 @@ for stock in stock_list:
                         row.source, row.url, row.clean_text, row.sentiment,
                         stock['ID'], row.advice, row.target, row.analyst))
         conn.commit()
+        print(f"Adding stock {stock['StockCode']} data in databse.")
 
 print("Done")
