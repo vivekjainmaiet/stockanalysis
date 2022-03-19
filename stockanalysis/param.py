@@ -13,7 +13,8 @@ PATIENCE = 50
 #        'hma34', 'hma55', 'hma99', 'hma200', 'rsi', 'atr', 'bb_upper',
 #        'bb_lower', 'macd_signal', 'macd_line', 'adx', 'vwap']
 # COLUMNS = ['Volume', 'rsi', 'macd_line', 'ema21', 'bb_upper', 'bb_lower', 'ema200','High', 'Low', 'Close']
-COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21', 'macd_signal']
+#COLUMNS = ['Volume', 'rsi','Close', 'ema200', 'ema21', 'macd_signal']
+COLUMNS = ['Close']
 
 
 #database config

@@ -59,7 +59,7 @@ class MoneyControl:
         return create_sentiment(clean_text(pd.DataFrame.from_dict(news_dict), column='title'))
 
 if __name__ == "__main__":
-    moneycontrol = MoneyControl('TCS', pages=2)
+    moneycontrol = MoneyControl('IT', pages=2)
     df_recommendation= moneycontrol.create_recommendation_df()
     print(df_recommendation)
     #df_news = moneycontrol.create_news_df()

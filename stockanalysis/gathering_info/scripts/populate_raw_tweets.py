@@ -26,7 +26,9 @@ for stock in stock_list:
     scraper.create_sentiment()
     df_tweets = scraper.save_df()
 
-    if stock_db_lastdate['Date'] == None:
+
+
+    if stock_db_lastdate == None:
         df_tweets = df_tweets
         df_tweets['stock_id'] = stock['ID']
     else:
